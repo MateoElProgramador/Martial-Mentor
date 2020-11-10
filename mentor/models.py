@@ -5,8 +5,8 @@ class Game(models.Model):
     title = models.CharField(max_length=50)
     short_title = models.CharField(max_length=20, blank=True)
 
-    """"""
     def __str__(self):
+        """Return short title if not blank, else return title."""
         return self.short_title if self.short_title != '' else self.title
 
     def img_url(self):

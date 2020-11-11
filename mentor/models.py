@@ -1,6 +1,15 @@
 from django.db import models
 
 
+def snakify(x):
+    x = str(x)  # ensure an object isn't asked to execute string methods (no type assumptions made)
+    banned_chars = ['.', ',', '/', ]
+    for c in banned_chars:
+        x = x.replace(c, '')
+    x = x.replace(' ', '_').lower()  # replace spaces with underscores
+    return x
+
+
 class Game(models.Model):
     title = models.CharField(max_length=50)
     short_title = models.CharField(max_length=20, blank=True)
@@ -10,7 +19,7 @@ class Game(models.Model):
         return self.short_title if self.short_title != '' else self.title
 
     def img_url(self):
-        return 'images/games/' + self.id + '/game_cover.png'
+        return 'images/games/' + snakify(str(self)) + '/game_cover.png'
 
 
 class Character(models.Model):
@@ -20,8 +29,5 @@ class Character(models.Model):
     def __str__(self):
         return self.name
 
-    def file_name(self):
-        return self.name.replace(' ', '_').lower()
-
     def img_url(self):
-        return 'images/games/' + self.game.id + '/characters/' + self.file_name() + '.png'
+        return 'images/games/' + snakify(self.game) + '/characters/' + snakify(self.name) + '.png'

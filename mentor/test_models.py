@@ -37,13 +37,13 @@ class GameModelTests(TestCase):
         """Returns correctly formatted url using game's short_title when it exists"""
         game = create_game('Super Smash Bros. for Wii U', 'Smash 4')
         url = game.img_url()
-        self.assertEqual(url, 'images/games/smash_4/game_cover.png')
+        self.assertEqual(url, 'mentor/images/games/smash_4/game_cover.png')
 
     def test_img_url_with_title(self):
         """Returns correctly formatted url using game's title when no short_title exists"""
         game = create_game('Super Smash Bros. Melee')
         url = game.img_url()
-        self.assertEqual(url, 'images/games/super_smash_bros_melee/game_cover.png')
+        self.assertEqual(url, 'mentor/images/games/super_smash_bros_melee/game_cover.png')
 
 
 class CharacterModelTests(TestCase):
@@ -51,4 +51,4 @@ class CharacterModelTests(TestCase):
     def test_img_url(self):
         game = create_game('Super Smash Bros. Ultimate', 'Smash Ultimate')
         char = Character.objects.create(name='Rosalina & Luma', game=game)
-        self.assertEqual(char.img_url(), 'images/games/smash_ultimate/characters/rosalina_&_luma.png')
+        self.assertEqual(char.img_url(), 'mentor/images/games/smash_ultimate/characters/rosalina_&_luma.png')

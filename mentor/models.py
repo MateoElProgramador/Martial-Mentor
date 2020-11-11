@@ -19,7 +19,7 @@ class Game(models.Model):
         return self.short_title if self.short_title != '' else self.title
 
     def img_url(self):
-        return 'images/games/' + snakify(str(self)) + '/game_cover.png'
+        return 'mentor/images/games/' + snakify(str(self)) + '/game_cover.png'
 
 
 class Character(models.Model):
@@ -30,4 +30,4 @@ class Character(models.Model):
         return self.name
 
     def img_url(self):
-        return 'images/games/' + snakify(self.game) + '/characters/' + snakify(self.name) + '.png'
+        return 'mentor/images/games/' + snakify(self.game) + '/characters/' + snakify(self.name) + '.png'

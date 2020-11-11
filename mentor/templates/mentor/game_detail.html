@@ -6,6 +6,7 @@
 {% for char in game.character_set.all %}
 <!--  Display character image if found, else display placeholder:  -->
 <!--    <img src="{% static char.img_url %}">-->
-    <img src="{% static 'mentor/images/games/smash_ultimate/characters/captain_falcon.png' %%}">
-<!--    <img src="{{ char.img_url|file_exists }}" alt="{{char.name}}">-->
+    <img src="{% static 'mentor/images/games/smash_ultimate/characters/captain_falcon.png' %}">
+<!-- Broken img filter which isn't used:-->
+<!--{#    <img src="{{ char.img_url|file_exists }}" alt="{{char.name}}"> #}-->
 {% endfor %}

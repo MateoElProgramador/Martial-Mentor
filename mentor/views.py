@@ -10,7 +10,7 @@ from mentor.models import Game
 
 # TODO: Figure out how to handle static files properly
 # --- Not currently used: ---
-@register.filter(name='file_exists')
+# @register.filter(name='file_exists')
 # def file_exists(filepath):
 #     print(STATIC_ROOT + '/static/' + filepath)
 #     if default_storage.exists(STATIC_ROOT + '/static/' + filepath):

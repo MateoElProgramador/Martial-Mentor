@@ -1,12 +1,12 @@
 {% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'mentor/style.css' %}">
 <h2>{{game.title}}</h2>
 <br/>
 
 <h4>Characters:</h4>
 {% for char in game.character_set.all %}
 <!--  Display character image if found, else display placeholder:  -->
-<!--    <img src="{% static char.img_url %}">-->
-    <img src="{% static 'mentor/images/games/smash_ultimate/characters/captain_falcon.png' %}">
+    <img class="char_img" src="{% static char.img_url %}">
 <!-- Broken img filter which isn't used:-->
 <!--{#    <img src="{{ char.img_url|file_exists }}" alt="{{char.name}}"> #}-->
 {% endfor %}

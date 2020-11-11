@@ -5,22 +5,21 @@ from django.templatetags.static import static
 from django.views import generic
 
 # from martialmentor.settings import STATIC_ROOT
+from martialmentor.settings import STATIC_ROOT
 from mentor.models import Game
 
 
 # TODO: Figure out how to handle static files properly
 # --- Not currently used: ---
-# @register.filter(name='file_exists')
-# def file_exists(filepath):
-#     print(STATIC_ROOT + '/static/' + filepath)
-#     if default_storage.exists(STATIC_ROOT + '/static/' + filepath):
-#         print("img found!")
-#         return static(filepath)
-#     else:
-#         print("img not found at", filepath)
-#         index = filepath.rfind('/')
-#         new_filepath = '/mentor/images/char_placeholder.jpg'
-#         return new_filepath
+@register.filter(name='file_exists')
+def file_exists(filepath):
+    # Use STATIC_ROOT to check for file in correct absolute filepath:
+    if default_storage.exists(STATIC_ROOT + '/static/' + filepath):
+        return static(filepath)
+    else:
+        # Return placeholder URL:
+        new_filepath = '/mentor/images/char_placeholder.jpg'
+        return static(new_filepath)
 
 
 class GameIndexView(generic.ListView):

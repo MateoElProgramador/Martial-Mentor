@@ -123,4 +123,14 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
+# URL of static files:
 STATIC_URL = '/static/'
+
+# Filepath where static files are copied to during collectstatic:
+STATIC_ROOT = os.path.join(BASE_DIR, 'root')
+
+# Directories which the collectstatic command searches for static files:
+# Note: static dirs in apps are detected automatically, so don't need to be pointed to in this list.
+# STATICFILES_DIRS = [
+    #os.path.join(BASE_DIR, 'static'),
+# ]

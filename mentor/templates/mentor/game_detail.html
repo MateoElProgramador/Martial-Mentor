@@ -6,7 +6,7 @@
 <h4>Characters:</h4>
 {% for char in game.character_set.all %}
 <!--  Display character image if found, else display placeholder:  -->
-    <img class="char_img" src="{% static char.img_url %}">
+<!--    <img class="char_img" src="{% static char.img_url %}">-->
 <!-- Broken img filter which isn't used:-->
-<!--{#    <img src="{{ char.img_url|file_exists }}" alt="{{char.name}}"> #}-->
+    <img class="char_img" src="{{ char.img_url|file_exists }}" alt="{{char.name}}">
 {% endfor %}

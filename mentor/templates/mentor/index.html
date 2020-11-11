@@ -1,1 +1,7 @@
 <h3>Welcome to the index</h3>
+
+<ul>
+{% for game in game_list %}
+    <li><a href="{% url 'mentor:game_detail' game.id %}">{{game}}</a></li>
+{% endfor %}
+</ul>

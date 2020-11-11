@@ -1,0 +1,7 @@
+<h2>{{game.title}}</h2>
+<br/>
+
+<h4>Characters:</h4>
+{% for char in game.character_set.all %}
+    {{char}}<br/>
+{% endfor %}

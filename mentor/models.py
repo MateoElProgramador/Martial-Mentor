@@ -20,5 +20,8 @@ class Character(models.Model):
     def __str__(self):
         return self.name
 
+    def file_name(self):
+        return self.name.replace(' ', '_').lower()
+
     def img_url(self):
-        return 'images/games/' + self.game.id + '/characters/' + self.name + '.png'
+        return 'images/games/' + self.game.id + '/characters/' + self.file_name() + '.png'

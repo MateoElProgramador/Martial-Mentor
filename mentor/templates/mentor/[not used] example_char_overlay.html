@@ -1,0 +1,39 @@
+{% extends "layout.html" %}
+{% load static %}
+{% block title %}{{game}}{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+    <h2>{{game.title}}</h2>
+    <h4>Characters:</h4>
+
+    <div class="row">
+
+        {% if char_num > 60 %}
+
+        <div class="col-11 left border p-0">
+            {% for i in list_77|slice:':60' %}
+                <img class="img-fluid char_overlay_img" src="{% static 'mentor/images/games/smash_ultimate/characters/captain_falcon.png' %}" alt="{{char.name}}">
+            {% endfor %}
+        </div>
+
+        <div class="col-1 right border p-0">
+            {% for i in list_77|slice:'60:' %}
+                <img class="img-fluid char_overlay_img" src="{% static 'mentor/images/games/smash_ultimate/characters/captain_falcon.png' %}" alt="{{char.name}}">
+            {% endfor %}
+        </div>
+
+
+        {% else %}
+            <div class="col-11 left border p-0">
+            {% for i in list_77 %}
+                <img class="img-fluid char_overlay_img" src="{% static 'mentor/images/games/smash_ultimate/characters/captain_falcon.png' %}" alt="{{char.name}}">
+            {% endfor %}
+        </div>
+
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

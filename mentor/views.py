@@ -40,6 +40,16 @@ class GameDetailView(generic.DetailView):
     def get_context_data(self, **kwargs):
         """Override get context method to add variable to context."""
         context = super().get_context_data(**kwargs)
-        context['list_60'] = 'a' * 60
-        context['list_17'] = 'a' * 17
+        # context['list_60'] = 'a' * 60
+        # context['list_17'] = 'a' * 17
+        # context['list_77'] = 'a' * 77
+
+        game = self.object
+        char_num = len(game.character_set.all())
+        print('Character num: ', char_num)
+
+        context['char_num'] = char_num
+
+        # context['char_num'] = 77
+
         return context

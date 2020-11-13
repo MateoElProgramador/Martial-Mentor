@@ -10,17 +10,40 @@
 
     <div class="row">
 
+        {% if char_num > 4 %}
+
         <div class="col-11 left border p-0">
-            {% for i in list_60 %}
-                <img class="img-fluid char_overlay_img" src="{% static 'mentor/images/games/smash_ultimate/characters/captain_falcon.png' %}" alt="{{char.name}}">
+            {% for char in game.character_set.all|slice:':4' %}
+                <figure>
+                    <!--  Display character image if found, else display placeholder:  -->
+                    <img class="char_img fig-img img-fluid" src="{{ char.img_url|img_exists }}" alt="{{char.name}}">
+                    <figcaption>{{char}}</figcaption>
+                </figure>
             {% endfor %}
         </div>
 
         <div class="col-1 right border p-0">
-            {% for i in list_17 %}
-                <img class="img-fluid char_overlay_img" src="{% static 'mentor/images/games/smash_ultimate/characters/captain_falcon.png' %}" alt="{{char.name}}">
+            {% for char in game.character_set.all|slice:'4:' %}
+                <figure>
+                    <!--  Display character image if found, else display placeholder:  -->
+                    <img class="char_img fig-img img-fluid" src="{{ char.img_url|img_exists }}" alt="{{char.name}}">
+                    <figcaption>{{char}}</figcaption>
+                </figure>
             {% endfor %}
         </div>
+
+        {% else %}
+            <div class="col-11 left border p-0">
+            {% for char in game.character_set.all %}
+                <figure>
+                    <!--  Display character image if found, else display placeholder:  -->
+                    <img class="char_img fig-img img-fluid" src="{{ char.img_url|img_exists }}" alt="{{char.name}}">
+                    <figcaption>{{char}}</figcaption>
+                </figure>
+            </div>
+        {% endfor %}
+
+        {% endif %}
     </div>
 </div>
 

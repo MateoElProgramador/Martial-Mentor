@@ -9,10 +9,9 @@ from martialmentor.settings import STATIC_ROOT
 from mentor.models import Game
 
 
-# TODO: Figure out how to handle static files properly
-# --- Not currently used: ---
-@register.filter(name='file_exists')
-def file_exists(filepath):
+@register.filter(name='img_exists')
+def img_exists(filepath):
+    """Check whether file at given url exists, and return either original static filepath to file or placeholder img"""
     # Use STATIC_ROOT to check for file in correct absolute filepath:
     if default_storage.exists(STATIC_ROOT + '/static/' + filepath):
         return static(filepath)

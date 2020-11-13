@@ -26,6 +26,13 @@ class GameIndexView(generic.ListView):
     template_name = 'mentor/index.html'
 
 
+def tools(request, game_id):
+    """Shows list of tools for selected game. Not that useful a page, will probably remove later."""
+    game = Game.objects.get(pk=game_id)
+    return render(request, 'mentor/tools.html', {'game': game})
+
+
 class GameDetailView(generic.DetailView):
+    """Used for character overlay."""
     model = Game
     template_name = 'mentor/game_detail.html'

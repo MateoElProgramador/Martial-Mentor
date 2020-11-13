@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+
+{% block title %}{{game}}: Tools{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+    <h3>{{game}}: Tools</h3>
+
+    <ul>
+        <li><a href="{% url 'mentor:char_overlay' game.id %}">Character icon overlay</a> </li>
+        <li><a href="#">Analytics</a></li>
+    </ul>
+</div>
+
+{% endblock %}

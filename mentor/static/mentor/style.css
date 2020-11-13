@@ -4,10 +4,6 @@
     max-width: 100vw;
 }
 
-.img_caption {
-    display: table-caption;
-}
-
 figure {
     display: inline-table;
     width: 1px;

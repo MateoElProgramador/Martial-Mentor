@@ -35,4 +35,11 @@ def tools(request, game_id):
 class GameDetailView(generic.DetailView):
     """Used for character overlay."""
     model = Game
-    template_name = 'mentor/game_detail.html'
+    template_name = 'mentor/char_overlay.html'
+
+    def get_context_data(self, **kwargs):
+        """Override get context method to add variable to context."""
+        context = super().get_context_data(**kwargs)
+        context['list_60'] = 'a' * 60
+        context['list_17'] = 'a' * 17
+        return context

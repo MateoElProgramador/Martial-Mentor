@@ -1,10 +1,11 @@
+from django.contrib.auth.forms import UserCreationForm
 from django.core.files.storage import default_storage
 from django.shortcuts import render
 from django.template.defaultfilters import register
 from django.templatetags.static import static
+from django.urls import reverse_lazy
 from django.views import generic
 
-# from martialmentor.settings import STATIC_ROOT
 from martialmentor.settings import STATIC_ROOT
 from mentor.models import Game
 
@@ -53,3 +54,12 @@ class GameDetailView(generic.DetailView):
         # context['char_num'] = 77
 
         return context
+
+
+class SignUpView(generic.CreateView):
+    """Generic view for signing up."""
+    form_class = UserCreationForm       # get default form for signing up
+    # reverse_lazy used due to generic class-based view
+    # (URLconf won't yet be loaded):
+    success_url = reverse_lazy('login')     # redirect to login upon successful signup
+    template_name = 'registration/signup.html'

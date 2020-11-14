@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block title %}Sign up{% endblock %}
+
+{% block content %}
+<div class="fluid-container px-5">
+    <h2>Sign up</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input class="btn-success" type="submit" value="Sign up">
+    </form>
+
+
+</div>
+{% endblock %}

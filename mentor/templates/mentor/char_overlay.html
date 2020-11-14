@@ -12,7 +12,7 @@
 
         {% if char_num > 4 %}
 
-        <div class="col-11 left border p-0">
+        <div class="col-11 left border p-0" id="top_char_container">
             {% for char in game.character_set.all|slice:':4' %}
                 <figure>
                     <!--  Display character image if found, else display placeholder:  -->
@@ -22,7 +22,7 @@
             {% endfor %}
         </div>
 
-        <div class="col-1 right border p-0">
+        <div class="col-1 right border p-0" id="side_char_container">
             {% for char in game.character_set.all|slice:'4:' %}
                 <figure>
                     <!--  Display character image if found, else display placeholder:  -->
@@ -33,7 +33,7 @@
         </div>
 
         {% else %}
-            <div class="col-11 left border p-0">
+            <div class="col-11 left border p-0" id="lone_char_container">
             {% for char in game.character_set.all %}
                 <figure>
                     <!--  Display character image if found, else display placeholder:  -->

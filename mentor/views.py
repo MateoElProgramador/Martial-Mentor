@@ -1,4 +1,5 @@
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
 from django.core.files.storage import default_storage
 from django.shortcuts import render
 from django.template.defaultfilters import register
@@ -56,9 +57,16 @@ class GameDetailView(generic.DetailView):
         return context
 
 
+class CustomUserCreationForm(UserCreationForm):
+    """Custom user creation form to include email address in fields."""
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'password1', 'password2')
+
+
 class SignUpView(generic.CreateView):
     """Generic view for signing up."""
-    form_class = UserCreationForm       # get default form for signing up
+    form_class = CustomUserCreationForm       # get default form for signing up
     # reverse_lazy used due to generic class-based view
     # (URLconf won't yet be loaded):
     success_url = reverse_lazy('login')     # redirect to login upon successful signup

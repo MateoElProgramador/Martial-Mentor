@@ -29,14 +29,14 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'mentor.apps.MentorConfig',     # put app first to override things like default templates for password reset
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
-    'mentor.apps.MentorConfig'
 ]
 
 MIDDLEWARE = [
@@ -135,3 +135,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'root')
 # Where users are redirected to upon login:
 LOGIN_REDIRECT_URL = 'mentor:index'
 LOGOUT_REDIRECT_URL = 'mentor:index'
+
+
+# Email:
+EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')

@@ -26,18 +26,23 @@
 
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
+            <!-- Home link: -->
             <li class="nav-item active">
                 <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
             </li>
+            <!-- Login link: -->
             <li class="nav-item">
-                <a class="nav-link" href="#">Link</a>
+                <a class="nav-link" href="{% url 'login' %}">Login</a>
             </li>
+
+            <!-- Games dropdown: -->
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
                    aria-haspopup="true" aria-expanded="false">
-                    Dropdown
+                    Games
                 </a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <!-- TODO Dynamically add games to nav dropdown (requires context containing all games) -->
                     <a class="dropdown-item" href="#">Action</a>
                     <a class="dropdown-item" href="#">Another action</a>
                     <div class="dropdown-divider"></div>
@@ -55,6 +60,16 @@
     </div>
 
 </nav>
+
+<!-- State whether logged in: -->
+<div class="fluid-container mx-3 my-3">
+    {% if user.is_authenticated %}
+    Logged in as {{user.username}}
+    <p><a href="{% url 'logout' %}">Log Out</a></p>
+    {% else %}
+        Not logged in
+    {% endif %}
+</div>
 
 {% block content %} {% endblock %}
 

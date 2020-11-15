@@ -16,9 +16,11 @@ def img_exists(filepath):
     """Check whether file at given url exists, and return either original static filepath to file or placeholder img"""
     # Use STATIC_ROOT to check for file in correct absolute filepath:
     if default_storage.exists(STATIC_ROOT + '/static/' + filepath):
+        print(STATIC_ROOT + '/static/' + filepath, ' exists!')
         return static(filepath)
     else:
         # Return placeholder URL:
+        print(STATIC_ROOT + '/static/' + filepath, ' does not exist')
         new_filepath = '/mentor/images/char_placeholder.jpg'
         return static(new_filepath)
 

@@ -1,4 +1,7 @@
+from django.conf.urls.static import static
 from django.urls import path
+
+from martialmentor.settings import STATIC_URL, STATIC_ROOT
 from mentor import views
 from mentor.views import SignUpView
 

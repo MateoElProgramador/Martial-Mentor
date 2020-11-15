@@ -14,26 +14,23 @@
 
         <div class="col-11 left border p-0" id="top_char_container">
             {% for char in game.character_set.all|slice:':66' %}
-                    <!--  Display character image:  -->
-                <img class="char_overlay_img img-fluid" src="{% static char.img_url %}" alt="{{char.name}}">
+                <!--  Display character image if found, else display placeholder:  -->
+                <img class="char_overlay_img img-fluid" src="{{ char|img_exists }}" alt="{{char.name}}">
             {% endfor %}
         </div>
 
         <div class="col-1 right border p-0" id="side_char_container">
             {% for char in game.character_set.all|slice:'66:' %}
-                <!--  Display character image:  -->
-                <img class="char_overlay_img img-fluid" src="{% static char.img_url %}" alt="{{char.name}}">
+                <!--  Display character image if found, else display placeholder:  -->
+                <img class="char_overlay_img img-fluid" src="{{ char|img_exists }}" alt="{{char.name}}">
             {% endfor %}
         </div>
 
         {% else %}
             <div class="border p-0" id="lone_char_container">
             {% for char in game.character_set.all %}
-                <figure>
-                    <!--  Display character image if found, else display placeholder:  -->
-                    <img class="char_overlay_img img-fluid" src="{{ char.img_url|img_exists }}" alt="{{char.name}}">
-                    <figcaption>{{char}}</figcaption>
-                </figure>
+                <!--  Display character image if found, else display placeholder:  -->
+                <img class="char_overlay_img img-fluid" src="{{ char|img_exists }}" alt="{{char.name}}">
             {% endfor %}
             </div>
 

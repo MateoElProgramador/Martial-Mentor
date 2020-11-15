@@ -12,16 +12,18 @@ from mentor.models import Game
 
 
 @register.filter(name='img_exists')
-def img_exists(filepath):
+def img_exists(char):
     """Check whether file at given url exists, and return either original static filepath to file or placeholder img"""
     # Use STATIC_ROOT to check for file in correct absolute filepath:
-    if default_storage.exists(STATIC_ROOT + '/static/' + filepath):
-        print(STATIC_ROOT + '/static/' + filepath, ' exists!')
-        return static(filepath)
+    char_path = STATIC_ROOT + '/mentor/images/' + char.img_url()
+    if default_storage.exists(char_path):
+        print(char_path, ' exists!')
+        print('Returning', static(char.rel_img_url()))
+        return static(char.rel_img_url())
     else:
         # Return placeholder URL:
-        print(STATIC_ROOT + '/static/' + filepath, ' does not exist')
-        new_filepath = '/mentor/images/char_placeholder.jpg'
+        print(char_path, ' does not exist')
+        new_filepath = '/mentor/images/char_placeholder.png'
         return static(new_filepath)
 
 
@@ -54,7 +56,7 @@ class GameDetailView(generic.DetailView):
 
         context['char_num'] = char_num
 
-        # context['char_num'] = 77
+        # context['char_num'] = 4
 
         return context
 

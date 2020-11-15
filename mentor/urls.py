@@ -3,7 +3,7 @@ from django.urls import path
 
 from martialmentor.settings import STATIC_URL, STATIC_ROOT
 from mentor import views
-from mentor.views import SignUpView
+from mentor.views import SignUpView, character_overlay
 
 app_name = 'mentor'
 
@@ -11,6 +11,6 @@ urlpatterns = [
     path('', views.GameIndexView.as_view(), name='index'),
     path('game/', views.GameIndexView.as_view(), name='alt_index'),
     path('game/<int:game_id>/', views.tools, name='tools'),
-    path('game/<int:pk>/char-overlay/', views.GameDetailView.as_view(), name='char_overlay'),
+    path('game/<int:game_id>/char-overlay/', character_overlay, name='char_overlay'),
     path('signup/', SignUpView.as_view(), name='signup'),
 ]

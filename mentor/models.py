@@ -51,4 +51,3 @@ class UserCharacter(models.Model):
         """ Shorthand to easily access the game of the given UserCharacter.
             Also used as a column on admin page. """
         return self.character.game
-

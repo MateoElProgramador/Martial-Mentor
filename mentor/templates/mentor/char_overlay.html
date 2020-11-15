@@ -13,24 +13,36 @@
         {% if char_num > 60 %}
 
         <div class="col-11 left border p-0" id="top_char_container">
-            {% for char in game.character_set.all|slice:':66' %}
-                <!--  Display character image if found, else display placeholder:  -->
-                <img class="char_overlay_img img-fluid" src="{{ char|img_exists }}" alt="{{char.name}}">
+            {% for char, elite_smash in char_data|slice:':66' %}
+                {% if elite_smash == True %}
+                    <!--  Display character image if found, else display placeholder:  -->
+                    <img class="char_overlay_img img-fluid" src="{{ char|img_exists }}" alt="{{char.name}}">
+                {% else %}
+                    <img class="char_overlay_img img-fluid grayscale" src="{{ char|img_exists }}" alt="{{char.name}}">
+                {% endif %}
             {% endfor %}
         </div>
 
         <div class="col-1 right border p-0" id="side_char_container">
-            {% for char in game.character_set.all|slice:'66:' %}
-                <!--  Display character image if found, else display placeholder:  -->
-                <img class="char_overlay_img img-fluid" src="{{ char|img_exists }}" alt="{{char.name}}">
+            {% for char, elite_smash in char_data|slice:'66:' %}
+                {% if elite_smash == True %}
+                    <!--  Display character image if found, else display placeholder:  -->
+                    <img class="char_overlay_img img-fluid" src="{{ char|img_exists }}" alt="{{char.name}}">
+                {% else %}
+                    <img class="char_overlay_img img-fluid grayscale" src="{{ char|img_exists }}" alt="{{char.name}}">
+                {% endif %}
             {% endfor %}
         </div>
 
         {% else %}
             <div class="border p-0" id="lone_char_container">
-            {% for char in game.character_set.all %}
-                <!--  Display character image if found, else display placeholder:  -->
-                <img class="char_overlay_img img-fluid" src="{{ char|img_exists }}" alt="{{char.name}}">
+            {% for char, elite_smash in char_data %}
+                {% if elite_smash == True %}
+                    <!--  Display character image if found, else display placeholder:  -->
+                    <img class="char_overlay_img img-fluid" src="{{ char|img_exists }}" alt="{{char.name}}">
+                {% else %}
+                    <img class="char_overlay_img img-fluid grayscale" src="{{ char|img_exists }}" alt="{{char.name}}">
+                {% endif %}
             {% endfor %}
             </div>
 

@@ -1,14 +1,15 @@
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.core.files.storage import default_storage
-from django.shortcuts import render
+from django.http import HttpResponseRedirect
+from django.shortcuts import render, get_object_or_404
 from django.template.defaultfilters import register
 from django.templatetags.static import static
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.views import generic
 
 from martialmentor.settings import STATIC_ROOT
-from mentor.models import Game
+from mentor.models import Game, UserCharacter
 
 
 @register.filter(name='img_exists')
@@ -17,12 +18,12 @@ def img_exists(char):
     # Use STATIC_ROOT to check for file in correct absolute filepath:
     char_path = STATIC_ROOT + '/mentor/images/' + char.img_url()
     if default_storage.exists(char_path):
-        print(char_path, ' exists!')
-        print('Returning', static(char.rel_img_url()))
+        # print(char_path, ' exists!')
+        # print('Returning', static(char.rel_img_url()))
         return static(char.rel_img_url())
     else:
         # Return placeholder URL:
-        print(char_path, ' does not exist')
+        # print(char_path, ' does not exist')
         new_filepath = '/mentor/images/char_placeholder.png'
         return static(new_filepath)
 
@@ -61,8 +62,51 @@ class GameDetailView(generic.DetailView):
         return context
 
 
+def character_overlay(request, game_id):
+    # If user not authenticated, redirect to login:
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('login'))
+
+    # Else get relevant data and serve overlay page:
+    else:
+        game = get_object_or_404(Game, pk=game_id)
+        # __ syntax is used to reference attribute of foreign key:
+        user_chars = UserCharacter.objects.filter(user=request.user, character__game=game)
+
+        # count() is more efficient than len since the DB only returns the count and no objects:
+        char_num = game.character_set.count()
+
+
+        # Loop though game.character_set:
+            # If char is in user_chars and elite_smash=True:
+                # set elite_smash in QuerySet to True
+            # else:
+                # set elite_smash in QuerySet to false
+
+        char_data = [0] * char_num
+        i = 0
+
+        # I'm probably hitting the database more than I need to here,
+        # but I'll get it working first and optimise later.
+
+        # Also I don't like having to make my own data structure when I already have 2 QuerySets,
+        # but I can't see how else to do it without plaguing the template with logic.
+        # TODO: Perf test, examine and optimise calls to database if required
+        # TODO: Look into alternate manner of serving template with char and elite smash data
+        for char in game.character_set.all():
+            if user_chars.filter(character=char).exists() and user_chars.get(character=char).elite_smash==True:
+                char_data[i] = (char, True)
+            else:
+                char_data[i] = (char, False)
+            i += 1
+
+        return render(request, 'mentor/char_overlay.html', {'game': game, 'user_chars': user_chars,
+                                                            'char_num': char_num, 'char_data': char_data})
+
+
 class CustomUserCreationForm(UserCreationForm):
     """Custom user creation form to include email address in fields."""
+
     class Meta:
         model = User
         fields = ('username', 'email', 'password1', 'password2')
@@ -70,8 +114,8 @@ class CustomUserCreationForm(UserCreationForm):
 
 class SignUpView(generic.CreateView):
     """Generic view for signing up."""
-    form_class = CustomUserCreationForm       # get default form for signing up
+    form_class = CustomUserCreationForm  # get default form for signing up
     # reverse_lazy used due to generic class-based view
     # (URLconf won't yet be loaded):
-    success_url = reverse_lazy('login')     # redirect to login upon successful signup
+    success_url = reverse_lazy('login')  # redirect to login upon successful signup
     template_name = 'registration/signup.html'

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Character, Game
+from .models import Character, Game, UserCharacter
 
 
 class CharacterInline(admin.TabularInline):
@@ -21,5 +21,10 @@ class CharacterAdmin(admin.ModelAdmin):
     list_filter = ['game']
 
 
+class UserCharacterAdmin(admin.ModelAdmin):
+    list_display = ['user', 'get_game', 'character', 'elite_smash']
+
+
 admin.site.register(Game, GameAdmin)
 admin.site.register(Character, CharacterAdmin)
+admin.site.register(UserCharacter, UserCharacterAdmin)

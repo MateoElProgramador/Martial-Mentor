@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.db import models
 
 
@@ -31,3 +32,13 @@ class Character(models.Model):
 
     def img_url(self):
         return 'mentor/images/games/' + snakify(self.game) + '/characters/' + snakify(self.name) + '.png'
+
+
+class UserCharacter(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    character = models.ForeignKey(Character, on_delete=models.CASCADE)
+    elite_smash = models.BooleanField(default=False)
+
+    def get_game(self):
+        return self.character.game
+

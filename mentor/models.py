@@ -2,9 +2,10 @@ from django.contrib.auth.models import User
 from django.db import models
 
 
+# TODO: replace snakify with in-built slugify?
 def snakify(x):
     x = str(x)  # ensure an object isn't asked to execute string methods (no type assumptions made)
-    banned_chars = ['.', ',', '/', '-']
+    banned_chars = ['.', ',', '/', ':', '!', '?']
     for c in banned_chars:
         x = x.replace(c, '')
     x = x.replace(' ', '_').lower()  # replace spaces with underscores

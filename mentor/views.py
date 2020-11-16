@@ -6,6 +6,7 @@ from django.shortcuts import render, get_object_or_404
 from django.template.defaultfilters import register
 from django.templatetags.static import static
 from django.urls import reverse_lazy, reverse
+from django.utils.safestring import mark_safe
 from django.views import generic
 
 from martialmentor.settings import STATIC_ROOT
@@ -26,6 +27,27 @@ def img_exists(char):
         # print(char_path, ' does not exist')
         new_filepath = '/mentor/images/char_placeholder.png'
         return static(new_filepath)
+
+
+@register.filter(name='serve_char_img')
+def serve_char_img(x):
+    """ Create and return an img tag for the given character, the image url and CSS classes; depending
+        on existence of character img and elite smash status."""
+    char, elite_smash = x
+
+    # Get img url (char or placeholder)
+    # Elite smash check (grayscale)
+    # Return complete img HTML tag
+
+    img_url = img_exists(char)
+
+    if elite_smash:
+        grayscale_str = ''
+    else:
+        grayscale_str = ' grayscale'
+
+    return mark_safe(
+        '<img class="char_overlay_img img-fluid' + grayscale_str + '" src="' + img_url + '" alt="' + char.name + '">')
 
 
 class GameIndexView(generic.ListView):
@@ -76,13 +98,6 @@ def character_overlay(request, game_id):
         # count() is more efficient than len since the DB only returns the count and no objects:
         char_num = game.character_set.count()
 
-
-        # Loop though game.character_set:
-            # If char is in user_chars and elite_smash=True:
-                # set elite_smash in QuerySet to True
-            # else:
-                # set elite_smash in QuerySet to false
-
         char_data = [0] * char_num
         i = 0
 
@@ -94,7 +109,7 @@ def character_overlay(request, game_id):
         # TODO: Perf test, examine and optimise calls to database if required
         # TODO: Look into alternate manner of serving template with char and elite smash data
         for char in game.character_set.all():
-            if user_chars.filter(character=char).exists() and user_chars.get(character=char).elite_smash==True:
+            if user_chars.filter(character=char).exists() and user_chars.get(character=char).elite_smash == True:
                 char_data[i] = (char, True)
             else:
                 char_data[i] = (char, False)

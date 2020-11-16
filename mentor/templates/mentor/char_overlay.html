@@ -13,36 +13,21 @@
         {% if char_num > 60 %}
 
         <div class="col-11 left border p-0" id="top_char_container">
-            {% for char, elite_smash in char_data|slice:':66' %}
-                {% if elite_smash == True %}
-                    <!--  Display character image if found, else display placeholder:  -->
-                    <img class="char_overlay_img img-fluid" src="{{ char|img_exists }}" alt="{{char.name}}">
-                {% else %}
-                    <img class="char_overlay_img img-fluid grayscale" src="{{ char|img_exists }}" alt="{{char.name}}">
-                {% endif %}
+            {% for x in char_data|slice:':66' %}
+                {{ x|serve_char_img }}
             {% endfor %}
         </div>
 
         <div class="col-1 right border p-0" id="side_char_container">
-            {% for char, elite_smash in char_data|slice:'66:' %}
-                {% if elite_smash == True %}
-                    <!--  Display character image if found, else display placeholder:  -->
-                    <img class="char_overlay_img img-fluid" src="{{ char|img_exists }}" alt="{{char.name}}">
-                {% else %}
-                    <img class="char_overlay_img img-fluid grayscale" src="{{ char|img_exists }}" alt="{{char.name}}">
-                {% endif %}
+            {% for x in char_data|slice:'66:' %}
+                {{ x|serve_char_img }}
             {% endfor %}
         </div>
 
         {% else %}
             <div class="border p-0" id="lone_char_container">
-            {% for char, elite_smash in char_data %}
-                {% if elite_smash == True %}
-                    <!--  Display character image if found, else display placeholder:  -->
-                    <img class="char_overlay_img img-fluid" src="{{ char|img_exists }}" alt="{{char.name}}">
-                {% else %}
-                    <img class="char_overlay_img img-fluid grayscale" src="{{ char|img_exists }}" alt="{{char.name}}">
-                {% endif %}
+            {% for x in char_data %}
+                {{ x|serve_char_img }}
             {% endfor %}
             </div>
 

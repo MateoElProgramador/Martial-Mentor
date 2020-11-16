@@ -50,8 +50,9 @@ def serve_char_img(x):
 
     # return mark_safe('<img class="char_overlay_img img-fluid' + grayscale_str + '" src="' + img_url + '" alt="' + char.name + '">')
     return mark_safe(
-        '<input class="char_overlay_img img-fluid' + grayscale_str + '" type="image" src="' + img_url +
-        '" alt="' + char.name + '" name="character_img" value="' + str(char.id) + '">')
+        '<a href="' + reverse("mentor:elite_smash_toggle", args=[char.game.id]) + '?char_id=' + str(char.id) + '">'
+                                    '<img class="char_overlay_img img-fluid' + grayscale_str + '" type="image" src="' + img_url + '" alt="' + char.name + '">'
+        '</a>')
 
 
 class GameIndexView(generic.ListView):
@@ -96,6 +97,8 @@ def character_overlay(request, game_id):
     # Else get relevant data and serve overlay page:
     else:
 
+        # ---------------- POST SECTION NOT USED, THIS CODE IS IN elite_smash_toggle -------------------- #
+
         if request.method == 'POST':
             print("Method: POST!")
             print("Post:", request.POST)
@@ -120,9 +123,10 @@ def character_overlay(request, game_id):
                 user_char.save()
 
             return HttpResponseRedirect(reverse('mentor:char_overlay', args=[game_id]))
+
+        # --------------------- END OF UNUSED CODE --------------- #
         else:
             print("Method: GET!")
-
 
         game = get_object_or_404(Game, pk=game_id)
         # __ syntax is used to reference attribute of foreign key:
@@ -155,6 +159,38 @@ def character_overlay(request, game_id):
                                                             'char_data': char_data})
         # return render(request, 'mentor/[not used] example_char_overlay.html', {'game': game, 'user_chars': user_chars,
         #                                                     'char_num': char_num, 'char_data': char_data, 'list_77': list_77})
+
+
+def elite_smash_toggle(request, game_id):
+    """ Used as a go-between to easily send id of character clicked on char overlay, via anchor tag.
+        Updates elite smash status of given character for signed in user, then redirects to character overlay page."""
+    # If user not authenticated, redirect to login:
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('login'))
+
+    # Else get relevant data and serve overlay page:
+    else:
+        # Get UserCharacter record
+        # If record doesn't exist, make one with elite_smash=True
+        # Else toggle existing record
+        # Toggle elite_smash
+
+        # Get character:
+        char = get_object_or_404(Character, pk=request.GET['char_id'])
+
+        # Search for existing UserCharacter record for this user & char:
+        user_char = UserCharacter.objects.filter(user=request.user, character=char).first()
+
+        # If UserCharacter record doesn't exist, create new record:
+        if user_char is None:
+            UserCharacter.objects.create(user=request.user, character=char, elite_smash=True)
+        # If record exists, toggle elite_smash boolean:
+        else:
+            elite_smash = user_char.elite_smash
+            user_char.elite_smash = not elite_smash
+            user_char.save()
+
+        return HttpResponseRedirect(reverse('mentor:char_overlay', args=[game_id]))
 
 
 class CustomUserCreationForm(UserCreationForm):

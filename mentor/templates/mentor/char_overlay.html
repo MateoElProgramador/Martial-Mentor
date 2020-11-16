@@ -14,10 +14,7 @@
 
         <div class="col-11 left border p-0" id="top_char_container">
             {% for x in char_data|slice:':66' %}
-                <form class="d-inline" method="post" action="{% url 'mentor:char_overlay' game.id %}">
-                    {% csrf_token %}
-                    {{ x|serve_char_img }}
-                </form>
+                {{ x|serve_char_img }}
             {% endfor %}
         </div>
 

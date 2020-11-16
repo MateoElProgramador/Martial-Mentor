@@ -4,13 +4,14 @@ from django.core.files.storage import default_storage
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.template.defaultfilters import register
+from django.template.defaulttags import csrf_token
 from django.templatetags.static import static
 from django.urls import reverse_lazy, reverse
 from django.utils.safestring import mark_safe
 from django.views import generic
 
 from martialmentor.settings import STATIC_ROOT
-from mentor.models import Game, UserCharacter
+from mentor.models import Game, UserCharacter, snakify, Character
 
 
 @register.filter(name='img_exists')
@@ -34,6 +35,7 @@ def serve_char_img(x):
     """ Create and return an img tag for the given character, the image url and CSS classes; depending
         on existence of character img and elite smash status."""
     char, elite_smash = x
+    s_name = snakify(char.name)
 
     # Get img url (char or placeholder)
     # Elite smash check (grayscale)
@@ -46,8 +48,10 @@ def serve_char_img(x):
     else:
         grayscale_str = ' grayscale'
 
+    # return mark_safe('<img class="char_overlay_img img-fluid' + grayscale_str + '" src="' + img_url + '" alt="' + char.name + '">')
     return mark_safe(
-        '<img class="char_overlay_img img-fluid' + grayscale_str + '" src="' + img_url + '" alt="' + char.name + '">')
+        '<input class="char_overlay_img img-fluid' + grayscale_str + '" type="image" src="' + img_url +
+        '" alt="' + char.name + '" name="character_img" value="' + str(char.id) + '">')
 
 
 class GameIndexView(generic.ListView):
@@ -91,6 +95,35 @@ def character_overlay(request, game_id):
 
     # Else get relevant data and serve overlay page:
     else:
+
+        if request.method == 'POST':
+            print("Method: POST!")
+            print("Post:", request.POST)
+            # Get UserCharacter record
+            # If record doesn't exist, make one with elite_smash=True
+            # Else toggle existing record
+            # Toggle elite_smash
+
+            # Get character:
+            char = get_object_or_404(Character, pk=request.POST['character_img'])
+
+            # Search for existing UserCharacter record for this user & char:
+            user_char = UserCharacter.objects.filter(user=request.user, character=char).first()
+
+            # If UserCharacter record doesn't exist, create new record:
+            if user_char is None:
+                UserCharacter.objects.create(user=request.user, character=char, elite_smash=True)
+            # If record exists, toggle elite_smash boolean:
+            else:
+                elite_smash = user_char.elite_smash
+                user_char.elite_smash = not elite_smash
+                user_char.save()
+
+            return HttpResponseRedirect(reverse('mentor:char_overlay', args=[game_id]))
+        else:
+            print("Method: GET!")
+
+
         game = get_object_or_404(Game, pk=game_id)
         # __ syntax is used to reference attribute of foreign key:
         user_chars = UserCharacter.objects.filter(user=request.user, character__game=game)
@@ -100,6 +133,8 @@ def character_overlay(request, game_id):
 
         char_data = [0] * char_num
         i = 0
+
+        list_77 = [0] * 77
 
         # I'm probably hitting the database more than I need to here,
         # but I'll get it working first and optimise later.
@@ -116,7 +151,10 @@ def character_overlay(request, game_id):
             i += 1
 
         return render(request, 'mentor/char_overlay.html', {'game': game, 'user_chars': user_chars,
-                                                            'char_num': char_num, 'char_data': char_data})
+                                                            'char_num': char_num,
+                                                            'char_data': char_data})
+        # return render(request, 'mentor/[not used] example_char_overlay.html', {'game': game, 'user_chars': user_chars,
+        #                                                     'char_num': char_num, 'char_data': char_data, 'list_77': list_77})
 
 
 class CustomUserCreationForm(UserCreationForm):

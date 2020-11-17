@@ -61,7 +61,7 @@ class GameIndexView(generic.ListView):
 
 def tools(request, game_id):
     """Shows list of tools for selected game. Not that useful a page, will probably remove later."""
-    game = Game.objects.get(pk=game_id)
+    game = get_object_or_404(Game, pk=game_id)
     return render(request, 'mentor/tools.html', {'game': game})
 
 

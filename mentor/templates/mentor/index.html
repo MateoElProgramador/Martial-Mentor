@@ -13,6 +13,10 @@
         <li><a href="{% url 'mentor:tools' game.id %}">{{game}}</a></li>
     {% endfor %}
     </ul>
+
+    {% if not game_list %}
+        <p>No games have been added to the system. Check back soon!</p>
+    {% endif %}
 </div>
 
 {% endblock %}

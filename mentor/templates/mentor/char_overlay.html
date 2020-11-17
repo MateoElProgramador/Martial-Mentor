@@ -4,28 +4,27 @@
 
 {% block content %}
 
-<div class="container-fluid">
+<div class="container-fluid my-2">
     <h2>{{game.title}}</h2>
-    <h4>Characters:</h4>
 
     <div class="row">
 
         {% if char_num > 60 %}
 
-        <div class="col-11 left border p-0" id="top_char_container">
+        <div class="col-11 left p-0" id="top_char_container">
             {% for x in char_data|slice:':66' %}
                 {{ x|serve_char_img }}
             {% endfor %}
         </div>
 
-        <div class="col-1 right border p-0" id="side_char_container">
+        <div class="col-1 right p-0" id="side_char_container">
             {% for x in char_data|slice:'66:' %}
                 {{ x|serve_char_img }}
             {% endfor %}
         </div>
 
         {% else %}
-            <div class="border p-0" id="lone_char_container">
+            <div class="p-0" id="lone_char_container">
             {% for x in char_data %}
                 {{ x|serve_char_img }}
             {% endfor %}

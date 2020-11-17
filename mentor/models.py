@@ -1,3 +1,5 @@
+import string
+
 from django.contrib.auth.models import User
 from django.db import models
 
@@ -5,7 +7,8 @@ from django.db import models
 # TODO: replace snakify with in-built slugify?
 def snakify(x):
     x = str(x)  # ensure an object isn't asked to execute string methods (no type assumptions made)
-    banned_chars = ['.', ',', '/', ':', '!', '?']
+    safe_punc = {'&', '-'}
+    banned_chars = set(string.punctuation).difference(safe_punc)
     for c in banned_chars:
         x = x.replace(c, '')
     x = x.replace(' ', '_').lower()  # replace spaces with underscores
@@ -20,7 +23,7 @@ class Game(models.Model):
         """Return short title if not blank, else return title."""
         return self.short_title if self.short_title != '' else self.title
 
-    # TODO: Change in line with Character img_url
+    # TODO: Change in line with Character img_url?
     def img_url(self):
         return 'mentor/images/games/' + snakify(str(self)) + '/game_cover.png'
 

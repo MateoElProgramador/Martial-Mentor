@@ -4,7 +4,6 @@ from django.core.files.storage import default_storage
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.template.defaultfilters import register
-from django.template.defaulttags import csrf_token
 from django.templatetags.static import static
 from django.urls import reverse_lazy, reverse
 from django.utils.safestring import mark_safe
@@ -25,7 +24,7 @@ def img_exists(char):
         return static(char.rel_img_url())
     else:
         # Return placeholder URL:
-        # print(char_path, ' does not exist')
+        print(char_path, ' does not exist')
         new_filepath = '/mentor/images/char_placeholder.png'
         return static(new_filepath)
 
@@ -51,7 +50,7 @@ def serve_char_img(x):
     # return mark_safe('<img class="char_overlay_img img-fluid' + grayscale_str + '" src="' + img_url + '" alt="' + char.name + '">')
     return mark_safe(
         '<a href="' + reverse("mentor:elite_smash_toggle", args=[char.game.id]) + '?char_id=' + str(char.id) + '">'
-                                    '<img class="char_overlay_img img-fluid' + grayscale_str + '" type="image" src="' + img_url + '" alt="' + char.name + '">'
+            '<img class="char_overlay_img img-fluid' + grayscale_str + '" type="image" src="' + img_url + '" alt="' + char.name + '">'
         '</a>')
 
 
@@ -148,7 +147,7 @@ def character_overlay(request, game_id):
         # TODO: Perf test, examine and optimise calls to database if required
         # TODO: Look into alternate manner of serving template with char and elite smash data
         for char in game.character_set.all():
-            if user_chars.filter(character=char).exists() and user_chars.get(character=char).elite_smash == True:
+            if user_chars.filter(character=char).exists() and user_chars.get(character=char).elite_smash is True:
                 char_data[i] = (char, True)
             else:
                 char_data[i] = (char, False)

@@ -76,6 +76,6 @@ class UserCharacterModelTests(TestCase):
     def test_get_game(self):
         """Returns the Game object related to the character in the given UserCharacter."""
         game, char = create_game_and_char('Street Fighter V', '', 'Ryu')
-        user = create_user()
+        user = create_user('Clive')
         user_char = create_user_char(user, char, False)
         self.assertEqual(user_char.get_game(), game)

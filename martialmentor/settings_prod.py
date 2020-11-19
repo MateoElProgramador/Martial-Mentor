@@ -8,7 +8,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.2/ref/settings/
 
 
-########## -------- This is the development settings.py -------- ##########
+########## -------- This is the production settings.py -------- ##########
 
 
 """
@@ -21,13 +21,14 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '3rl@)2gtsh#803ewc#^4+y#!9--t1#r)30wu=!79t8jlw7+5@2'
+# Read SECRET_KEY from text file:
+with open('/home/MateoElGoron/secret_key.txt') as f:
+    SECRET_KEY = f.read().strip()
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['MateoElGoron.eu.pythonanywhere.com']
 
 # Application definition
 
@@ -77,13 +78,17 @@ WSGI_APPLICATION = 'martialmentor.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
+db_password = ''
+with open('/home/MateoElGoron/db_ps.txt') as f:
+    db_password = f.read().strip()
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'martial_mentor',
-        'USER': 'postgres',
-        'PASSWORD': ' ',
-        'HOST': 'localhost',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'MateoElGoron$mentor_db',
+        'USER': 'MateoElGoron',
+        'PASSWORD': db_password,
+        'HOST': 'MateoElGoron.mysql.eu.pythonanywhere-services.com',
         'PORT': '5432'
     }
 }

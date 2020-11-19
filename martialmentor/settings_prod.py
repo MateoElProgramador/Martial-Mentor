@@ -89,7 +89,9 @@ DATABASES = {
         'USER': 'MateoElGoron',
         'PASSWORD': db_password,
         'HOST': 'MateoElGoron.mysql.eu.pythonanywhere-services.com',
-        'PORT': '5432'
+        'TEST': {
+            'NAME': 'MateoElGoron$test_mentor_db',
+        }
     }
 }
 

@@ -2,8 +2,8 @@ from django.test import TestCase, LiveServerTestCase
 from django.urls import reverse
 from selenium import webdriver
 import chromedriver_binary  # adds chromedriver binary to path
-from selenium.webdriver.common.keys import Keys
 
+from mentor.models import snakify
 from mentor.tests.helpers import create_game, MyStaticLiveServerTestCase, create_user, login, create_characters
 
 
@@ -162,9 +162,83 @@ class CharOverlayTests(MyStaticLiveServerTestCase):
         side_container_imgs = s.find_elements_by_xpath("//*[@id='side_char_container']/a")
         self.assertEqual(len(side_container_imgs), 9)
 
+    def test_char_overlay_61_65_characters(self):
+        """If there are between 61 and 65 characters, the character icons are displayed correctly."""
+        s = self.selenium
+        server_url = self.live_server_url
+        game = self.game
 
-    # Edge cases
+        # Create characters:
+        chars = create_characters(game, 61)
 
-    # Click icon, toggle elite smash (false to true)
-    # Click icon, toggle elite smash (true to false)
+        login(s, server_url, self.user.username, self.user.password)
+        s.get(server_url + reverse('mentor:char_overlay', args=[game.id]))
 
+        # Check number of imgs in lone_char_container:
+        lone_container_imgs = s.find_elements_by_xpath("//*[@id='lone_char_container']/a")
+        self.assertEqual(len(lone_container_imgs), 0)
+
+        # Check number of imgs in top_char_container:
+        top_container_imgs = s.find_elements_by_xpath("//*[@id='top_char_container']/a")
+        self.assertEqual(len(top_container_imgs), 61)
+
+        # Check number of imgs in side_char_container:
+        side_container_imgs = s.find_elements_by_xpath("//*[@id='side_char_container']/a")
+        self.assertEqual(len(side_container_imgs), 0)
+
+        # Add 4 more more characters, bringing it to 65 characters:
+        chars += create_characters(game, 4, start_ind=61)
+
+        s.refresh()
+
+        # Check number of imgs in lone_char_container:
+        lone_container_imgs = s.find_elements_by_xpath("//*[@id='lone_char_container']/a")
+        self.assertEqual(len(lone_container_imgs), 0)
+
+        # Check number of imgs in top_char_container:
+        top_container_imgs = s.find_elements_by_xpath("//*[@id='top_char_container']/a")
+        self.assertEqual(len(top_container_imgs), 65)
+
+        # Check number of imgs in side_char_container:
+        side_container_imgs = s.find_elements_by_xpath("//*[@id='side_char_container']/a")
+        self.assertEqual(len(side_container_imgs), 0)
+
+    def test_char_overlay_toggle_elite_smash(self):
+        """ If a character image is clicked, its elite smash status is toggled, and the image is displayed
+            in full colour/greyscale, depending on elite smash status."""
+        s = self.selenium
+        server_url = self.live_server_url
+        game = self.game
+
+        # Create characters:
+        chars = create_characters(game, 5)
+        first_char = chars[0]
+
+        # Login and nav to char overlay page:
+        login(s, server_url, self.user.username, self.user.password)
+        s.get(server_url + reverse('mentor:char_overlay', args=[game.id]))
+
+        # Note: Since character has just been created, no UserCharacter record will exist for this user and char.
+        # Check that first character image is greyscale, since not in elite smash by default:
+        first_char_imgs = s.find_elements_by_css_selector("img#" + snakify(first_char.name) + ".grayscale")
+        self.assertEqual(len(first_char_imgs), 1)
+
+        # Check that no colour img for first character exists (no grayscale CSS class):
+        first_char_coloured = s.find_elements_by_css_selector("img#" + snakify(first_char.name) + ":not(.grayscale)")
+        self.assertEqual(len(first_char_coloured), 0)
+
+        # Click img:
+        first_char_imgs[0].click()
+        # s.implicitly_wait(3)
+
+        # Check that img of first character is now full colour:
+        first_char_imgs = s.find_elements_by_css_selector("img#" + snakify(first_char.name) + ":not(.grayscale)")
+        self.assertEqual(len(first_char_imgs), 1)
+
+        # Click img again to toggle to true:
+        first_char_imgs[0].click()
+        # s.implicitly_wait(3)
+
+        # Check that first character image is greyscale again (not in elite smash):
+        first_char_imgs = s.find_elements_by_css_selector("img#" + snakify(first_char.name) + ".grayscale")
+        self.assertEqual(len(first_char_imgs), 1)

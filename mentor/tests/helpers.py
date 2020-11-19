@@ -70,8 +70,8 @@ def login(selenium, url, username, password_text):
     selenium.find_element_by_xpath('//input[@value="Log In"]').click()
 
 
-def create_characters(game, char_num):
+def create_characters(game, char_num, start_ind=0):
     chars = [0] * char_num
-    for i, char_name in enumerate(char_names[:char_num]):
+    for i, char_name in enumerate(char_names[start_ind:start_ind + char_num]):
         chars[i] = create_char(char_name, game)
     return chars

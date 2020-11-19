@@ -50,7 +50,8 @@ def serve_char_img(x):
     # return mark_safe('<img class="char_overlay_img img-fluid' + grayscale_str + '" src="' + img_url + '" alt="' + char.name + '">')
     return mark_safe(
         '<a href="' + reverse("mentor:elite_smash_toggle", args=[char.game.id]) + '?char_id=' + str(char.id) + '">'
-            '<img class="char_overlay_img img-fluid' + grayscale_str + '" type="image" src="' + img_url + '" alt="' + char.name + '">'
+            '<img id="' + snakify(char.name) + '" class="char_overlay_img img-fluid' + grayscale_str +
+                    '" type="image" src="' + img_url + '" alt="' + char.name + '">'
         '</a>')
 
 
@@ -95,38 +96,6 @@ def character_overlay(request, game_id):
 
     # Else get relevant data and serve overlay page:
     else:
-
-        # ---------------- POST SECTION NOT USED, THIS CODE IS IN elite_smash_toggle -------------------- #
-
-        if request.method == 'POST':
-            print("Method: POST!")
-            print("Post:", request.POST)
-            # Get UserCharacter record
-            # If record doesn't exist, make one with elite_smash=True
-            # Else toggle existing record
-            # Toggle elite_smash
-
-            # Get character:
-            char = get_object_or_404(Character, pk=request.POST['character_img'])
-
-            # Search for existing UserCharacter record for this user & char:
-            user_char = UserCharacter.objects.filter(user=request.user, character=char).first()
-
-            # If UserCharacter record doesn't exist, create new record:
-            if user_char is None:
-                UserCharacter.objects.create(user=request.user, character=char, elite_smash=True)
-            # If record exists, toggle elite_smash boolean:
-            else:
-                elite_smash = user_char.elite_smash
-                user_char.elite_smash = not elite_smash
-                user_char.save()
-
-            return HttpResponseRedirect(reverse('mentor:char_overlay', args=[game_id]))
-
-        # --------------------- END OF UNUSED CODE --------------- #
-        else:
-            print("Method: GET!")
-
         game = get_object_or_404(Game, pk=game_id)
         # __ syntax is used to reference attribute of foreign key:
         user_chars = UserCharacter.objects.filter(user=request.user, character__game=game)

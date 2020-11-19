@@ -15,6 +15,12 @@ def snakify(x):
     return x
 
 
+# Make email address a required field, for sake of signup form:
+User._meta.get_field('email')._unique = True
+User._meta.get_field('email').blank = False
+User._meta.get_field('email').null = False
+
+
 class Game(models.Model):
     title = models.CharField(max_length=50)
     short_title = models.CharField(max_length=20, blank=True)

@@ -79,7 +79,7 @@ class CharOverlayTests(MyStaticLiveServerTestCase):
         server_url = self.live_server_url
 
         # Log in using helper method::
-        login(s, server_url, self.user.username, self.user.password)
+        login(s, server_url, self.user.username)
 
         # Navigate to tools for given game:
         s.get(server_url + reverse('mentor:tools', args=[game.id]))
@@ -99,8 +99,7 @@ class CharOverlayTests(MyStaticLiveServerTestCase):
         game = self.game
 
         # Log in using helper method::
-        login(s, server_url, self.user.username, self.user.password)
-
+        login(s, server_url, self.user.username)
         s.get(server_url + reverse('mentor:char_overlay', args=[game.id]))
         assert 'No characters exist for ' + str(game) + ' yet, please check back later!' in s.page_source
 
@@ -109,8 +108,7 @@ class CharOverlayTests(MyStaticLiveServerTestCase):
         s = self.selenium
         s_url = self.live_server_url
 
-        login(s, s_url, self.user.username, self.user.password)
-
+        login(s, s_url, self.user.username)
         s.get(s_url + reverse('mentor:char_overlay', args=[666]))
         assert 'Not Found' in s.page_source
 
@@ -123,7 +121,7 @@ class CharOverlayTests(MyStaticLiveServerTestCase):
         # Create characters:
         chars = create_characters(game, 5)
 
-        login(s, server_url, self.user.username, self.user.password)
+        login(s, server_url, self.user.username)
         s.get(server_url + reverse('mentor:char_overlay', args=[game.id]))
 
         # Check number of imgs in lone_char_container:
@@ -147,7 +145,7 @@ class CharOverlayTests(MyStaticLiveServerTestCase):
         # Create characters:
         chars = create_characters(game, 75)
 
-        login(s, server_url, self.user.username, self.user.password)
+        login(s, server_url, self.user.username)
         s.get(server_url + reverse('mentor:char_overlay', args=[game.id]))
 
         # Check number of imgs in lone_char_container:
@@ -171,7 +169,7 @@ class CharOverlayTests(MyStaticLiveServerTestCase):
         # Create characters:
         chars = create_characters(game, 61)
 
-        login(s, server_url, self.user.username, self.user.password)
+        login(s, server_url, self.user.username)
         s.get(server_url + reverse('mentor:char_overlay', args=[game.id]))
 
         # Check number of imgs in lone_char_container:
@@ -215,7 +213,7 @@ class CharOverlayTests(MyStaticLiveServerTestCase):
         first_char = chars[0]
 
         # Login and nav to char overlay page:
-        login(s, server_url, self.user.username, self.user.password)
+        login(s, server_url, self.user.username)
         s.get(server_url + reverse('mentor:char_overlay', args=[game.id]))
 
         # Note: Since character has just been created, no UserCharacter record will exist for this user and char.

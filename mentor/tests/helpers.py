@@ -61,12 +61,12 @@ def create_user(name, password='123'):
     return user
 
 
-def login(selenium, url, username, password_text):
+def login(selenium, url, username, password_text='123'):
     """Log in using Selenium."""
     selenium.get(url + reverse('login'))
 
-    selenium.find_element_by_name('username').send_keys('Clive')
-    selenium.find_element_by_name('password').send_keys('123')
+    selenium.find_element_by_name('username').send_keys(username)
+    selenium.find_element_by_name('password').send_keys(password_text)
     selenium.find_element_by_xpath('//input[@value="Log In"]').click()
 
 

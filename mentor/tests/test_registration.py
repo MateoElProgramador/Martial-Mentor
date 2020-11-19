@@ -22,8 +22,7 @@ class RegistrationTests(MyStaticLiveServerTestCase):
         s = self.selenium
         self.sign_up('Dabuz', 'dabuz@thinkpad.gg', 'IceCreamIsTheBest')
 
-        print(s.current_url)
-        # Successful signup redirects to login page
+        # Successful signup redirects to login page:
         assert 'login' in s.current_url
 
     def test_invalid_signup(self):

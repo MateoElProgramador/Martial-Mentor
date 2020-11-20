@@ -15,13 +15,13 @@
         {% if char_num > 60 %}
 
         <div class="col-11 left p-0" id="top_char_container">
-            {% for x in char_data|slice:':66' %}
+            {% for x in char_data|slice:':62' %}
                 {{ x|serve_char_img }}
             {% endfor %}
         </div>
 
         <div class="col-1 right p-0" id="side_char_container">
-            {% for x in char_data|slice:'66:' %}
+            {% for x in char_data|slice:'62:' %}
                 {{ x|serve_char_img }}
             {% endfor %}
         </div>

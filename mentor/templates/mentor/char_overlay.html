@@ -2,11 +2,13 @@
 {% load static %}
 {% block title %}{{game}}: Character Overlay{% endblock %}
 
+{% block body_start %}<body class="{{body_class}}">{% endblock %}
+
 {% block content %}
 
 <div class="container-fluid my-2 px-5 no_highlight">
     <h2>{{game}}: Character Overlay</h2>
-    <input id="chroma_checkbox" class="no_highlight" type="checkbox" checked="true">
+    <input id="chroma_checkbox" class="no_highlight" type="checkbox" {{checkbox_checked}}>
     <label for="chroma_checkbox" class="no_highlight">Toggle chroma key</label>
 
     <div class="row my-3">
@@ -44,5 +46,6 @@
 {% endblock %}
 
 {% block scripts %}
+    {% csrf_token %}
     <script src="{% static 'mentor/scripts/char_overlay.js' %}"></script>
 {% endblock %}

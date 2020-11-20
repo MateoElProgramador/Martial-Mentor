@@ -1,7 +1,9 @@
+from distutils.util import strtobool
+
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.core.files.storage import default_storage
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponseNotAllowed, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.template.defaultfilters import register
 from django.templatetags.static import static
@@ -104,17 +106,27 @@ def character_overlay(request, game_id):
         char_num = game.character_set.count()
 
         char_data = [0] * char_num
-        i = 0
-
         list_77 = [0] * 77
+
+        # Configure chroma key session:
+        if request.session.get('chromakey') is None:
+            request.session['chromakey'] = 'false'
+
+        # Set values of body_class and checkbox_checked strings to display body and checkbox accordingly:
+        if request.session['chromakey'] == 'true':
+            body_class = 'chromakey'
+            checkbox_checked = 'checked'
+        else:
+            body_class = ''
+            checkbox_checked = ''
 
         # I'm probably hitting the database more than I need to here,
         # but I'll get it working first and optimise later.
-
         # Also I don't like having to make my own data structure when I already have 2 QuerySets,
         # but I can't see how else to do it without plaguing the template with logic.
         # TODO: Perf test, examine and optimise calls to database if required
         # TODO: Look into alternate manner of serving template with char and elite smash data
+        i = 0
         for char in game.character_set.all():
             if user_chars.filter(character=char).exists() and user_chars.get(character=char).elite_smash is True:
                 char_data[i] = (char, True)
@@ -124,7 +136,10 @@ def character_overlay(request, game_id):
 
         return render(request, 'mentor/char_overlay.html', {'game': game, 'user_chars': user_chars,
                                                             'char_num': char_num,
-                                                            'char_data': char_data})
+                                                            'char_data': char_data,
+                                                            'body_class': body_class,
+                                                            'checkbox_checked': checkbox_checked,
+                                                            })
         # return render(request, 'mentor/[not used] example_char_overlay.html', {'game': game, 'user_chars': user_chars,
         #                                                     'char_num': char_num, 'char_data': char_data, 'list_77': list_77})
 
@@ -159,6 +174,17 @@ def elite_smash_toggle(request, game_id):
             user_char.save()
 
         return HttpResponseRedirect(reverse('mentor:char_overlay', args=[game_id]))
+
+
+def toggle_chromakey_session(request):
+    """Receive Ajax requests which toggles chromakey session value."""
+    if not request.is_ajax() or not request.method == 'POST':
+        return HttpResponseNotAllowed(['POST'])
+
+    # Toggle boolean by converting str to bool, inverting, then convert back to string:
+    request.session['chromakey'] = str(not strtobool(request.session['chromakey'])).lower()
+    print('chromakey session is now', request.session['chromakey'])
+    return HttpResponse('ok')
 
 
 class CustomUserCreationForm(UserCreationForm):

@@ -4,10 +4,12 @@
 
 {% block content %}
 
-<div class="container-fluid my-2">
+<div class="container-fluid my-2 px-5 no_highlight">
     <h2>{{game}}: Character Overlay</h2>
+    <input id="chroma_checkbox" class="no_highlight" type="checkbox">
+    <label for="chroma_checkbox" class="no_highlight">Toggle chroma key</label>
 
-    <div class="row">
+    <div class="row my-3">
 
         {# Split imgs between top and side containers if more than 60 characters: #}
         {% if char_num > 60 %}
@@ -39,4 +41,8 @@
     </div>
 </div>
 
+{% endblock %}
+
+{% block scripts %}
+    <script src="{% static 'mentor/scripts/char_overlay.js' %}"></script>
 {% endblock %}

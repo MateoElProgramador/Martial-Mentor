@@ -117,3 +117,6 @@ GitHub.sublime-settings
 
 # Root folder for copied static files!
 /root
+
+# Settings file: The relevant settings file is manually copied from settings_dev.py or settings_prod.py
+martialmentor/settings.py

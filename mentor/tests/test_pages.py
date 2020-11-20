@@ -227,7 +227,7 @@ class CharOverlayTests(MyStaticLiveServerTestCase):
 
         # Click img:
         first_char_imgs[0].click()
-        # s.implicitly_wait(3)
+        s.implicitly_wait(3)
 
         # Check that img of first character is now full colour:
         first_char_imgs = s.find_elements_by_css_selector("img#" + snakify(first_char.name) + ":not(.grayscale)")
@@ -235,7 +235,7 @@ class CharOverlayTests(MyStaticLiveServerTestCase):
 
         # Click img again to toggle to true:
         first_char_imgs[0].click()
-        # s.implicitly_wait(3)
+        s.implicitly_wait(3)
 
         # Check that first character image is greyscale again (not in elite smash):
         first_char_imgs = s.find_elements_by_css_selector("img#" + snakify(first_char.name) + ".grayscale")

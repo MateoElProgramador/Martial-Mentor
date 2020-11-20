@@ -21,3 +21,7 @@ $('#chroma_checkbox').change(function() {
 
       });
 });
+
+$('.char_overlay_img').click(function() {
+    $(this).toggleClass('grayscale');
+});

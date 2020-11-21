@@ -2,7 +2,7 @@ from django.urls import reverse
 from selenium import webdriver
 import chromedriver_binary  # adds chromedriver binary to path
 
-from mentor.tests.helpers import MyStaticLiveServerTestCase, create_user, login
+from mentor.tests.helpers import MyStaticLiveServerTestCase, create_user, login, create_game
 
 
 class RegistrationTests(MyStaticLiveServerTestCase):
@@ -81,3 +81,18 @@ class RegistrationTests(MyStaticLiveServerTestCase):
         # Non-existent username:
         login(s, self.live_server_url, 'UnlawfulUrsula', 'IncorrectPasswordOops')
         assert 'Please enter a correct username and password.' in s.page_source
+
+    def test_logout(self):
+        """The user is logged out once the logout link is selected in the navbar."""
+        s = self.selenium
+        user = create_user('DeterminedDemetrius', password="I'llNeverRememberThisOne")
+        game = create_game('Super Smash Bros. Melee', 'Melee')
+        login(s, self.live_server_url, user.username, "I'llNeverRememberThisOne")
+
+        s.find_element_by_id('logout').click()
+        assert 'Log out' not in s.page_source
+        assert 'Select a game:' in s.page_source
+
+        # Attempt to go to character overlay, which you can only access whilst logged in:
+        s.get(self.live_server_url + reverse('mentor:char_overlay', args=[game.id]))
+        assert 'login' in s.current_url

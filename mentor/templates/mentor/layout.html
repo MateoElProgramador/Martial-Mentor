@@ -16,7 +16,7 @@
 </head>
 
 {% block body_start %}<body>{% endblock %}
-<!--  Insert nav here  -->
+<!--  Nav bar:  -->
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <a class="navbar-brand" href="{% url 'mentor:index' %}">Martial Mentor</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
@@ -33,7 +33,7 @@
                     <a class="nav-link disabled">{{ user.username }}</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'logout' %}">Log out</a>
+                    <a id="logout" class="nav-link" href="{% url 'logout' %}">Log out</a>
                 </li>
             <!-- Show log in and sign up if not logged in: -->
             {% else %}

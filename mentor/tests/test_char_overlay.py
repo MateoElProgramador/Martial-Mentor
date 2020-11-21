@@ -2,6 +2,7 @@ import time
 from django.urls import reverse
 from mentor.models import snakify
 from mentor.tests.helpers import create_characters, login, MyStaticLiveServerTestCase, create_game, create_user
+import chromedriver_binary  # adds chromedriver binary to path
 
 
 class CharOverlayTests(MyStaticLiveServerTestCase):
@@ -229,3 +230,31 @@ class CharOverlayTests(MyStaticLiveServerTestCase):
         self.assertEqual(len(char_imgs), 1)
         char_imgs = s.find_elements_by_css_selector("img#" + snakify(chars[3].name) + ":not(.grayscale)")
         self.assertEqual(len(char_imgs), 1)
+
+    def test_chroma_key_toggle(self):
+        """ The chroma key background can be toggled using the checkbox, and this preference persists
+            after leaving the page."""
+        s = self.selenium
+        game = self.game
+        login(s, self.live_server_url, self.user.username)
+
+        chars = create_characters(game, 5)
+        s.get(self.live_server_url + reverse('mentor:char_overlay', args=[game.id]))
+
+        # Check that body background colour isn't chroma key:
+        self.assertEqual(len(s.find_elements_by_css_selector('body.chromakey')), 0)
+
+        # Click checkbox and check if body is now chromakey:
+        s.find_element_by_id('chroma_checkbox').click()
+        self.assertEqual(len(s.find_elements_by_css_selector('body.chromakey')), 1)
+
+        # Navigate away from character overlay page and back again:
+        s.get(self.live_server_url + reverse('mentor:index'))
+        s.get(self.live_server_url + reverse('mentor:char_overlay', args=[game.id]))
+
+        # Check that background is still chroma key:
+        self.assertEqual(len(s.find_elements_by_css_selector('body.chromakey')), 1)
+
+        # Toggle again to not chroma key and check:
+        s.find_element_by_id('chroma_checkbox').click()
+        self.assertEqual(len(s.find_elements_by_css_selector('body.chromakey')), 0)

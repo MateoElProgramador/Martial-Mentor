@@ -1,3 +1,5 @@
+import time
+
 from django.test import TestCase, LiveServerTestCase
 from django.urls import reverse
 from selenium import webdriver
@@ -228,16 +230,55 @@ class CharOverlayTests(MyStaticLiveServerTestCase):
 
         # Click img:
         first_char_imgs[0].click()
-        s.implicitly_wait(3)
 
-        # Check that img of first character is now full colour:
+        # Wait for page to refresh:
+        time.sleep(0.5)
+
+        # Test that character is full colour after reload:
         first_char_imgs = s.find_elements_by_css_selector("img#" + snakify(first_char.name) + ":not(.grayscale)")
         self.assertEqual(len(first_char_imgs), 1)
 
         # Click img again to toggle to true:
         first_char_imgs[0].click()
-        s.implicitly_wait(3)
+        time.sleep(0.5)
 
-        # Check that first character image is greyscale again (not in elite smash):
+        # Check for grayscale after reload:
         first_char_imgs = s.find_elements_by_css_selector("img#" + snakify(first_char.name) + ".grayscale")
         self.assertEqual(len(first_char_imgs), 1)
+
+    def test_elite_smash_status_persistence(self):
+        """The elite smash status of all characters are kept after leaving the page and returning."""
+        s = self.selenium
+        game = self.game
+        login(s, self.live_server_url, self.user.username)
+
+        chars = create_characters(game, 5)
+        s.get(self.live_server_url + reverse('mentor:char_overlay', args=[game.id]))
+
+        s.find_element_by_id(snakify(chars[0].name)).click()
+        time.sleep(0.2)
+        s.find_element_by_id(snakify(chars[2].name)).click()
+        time.sleep(0.2)
+        s.find_element_by_id(snakify(chars[3].name)).click()
+        time.sleep(0.5)
+
+        # Check that clicked character imgs are not grayscale:
+        char_imgs = s.find_elements_by_css_selector("img#" + snakify(chars[0].name) + ":not(.grayscale)")
+        self.assertEqual(len(char_imgs), 1)
+        char_imgs = s.find_elements_by_css_selector("img#" + snakify(chars[2].name) + ":not(.grayscale)")
+        self.assertEqual(len(char_imgs), 1)
+        char_imgs = s.find_elements_by_css_selector("img#" + snakify(chars[3].name) + ":not(.grayscale)")
+        self.assertEqual(len(char_imgs), 1)
+
+        s.get(self.live_server_url + reverse('mentor:index'))
+        s.get(self.live_server_url + reverse('mentor:char_overlay', args=[game.id]))
+
+        # Check that clicked character imgs are not grayscale:
+        char_imgs = s.find_elements_by_css_selector("img#" + snakify(chars[0].name) + ":not(.grayscale)")
+        self.assertEqual(len(char_imgs), 1)
+        char_imgs = s.find_elements_by_css_selector("img#" + snakify(chars[2].name) + ":not(.grayscale)")
+        self.assertEqual(len(char_imgs), 1)
+        char_imgs = s.find_elements_by_css_selector("img#" + snakify(chars[3].name) + ":not(.grayscale)")
+        self.assertEqual(len(char_imgs), 1)
+
+

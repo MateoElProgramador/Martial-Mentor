@@ -30,7 +30,7 @@ class MyStaticLiveServerTestCase(StaticLiveServerTestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.selenium = webdriver.Chrome()
-        cls.selenium.implicitly_wait(10)
+        cls.selenium.implicitly_wait(1)
 
     @classmethod
     def tearDownClass(cls):

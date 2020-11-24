@@ -120,3 +120,6 @@ GitHub.sublime-settings
 
 # Settings file: The relevant settings file is manually copied from settings_dev.py or settings_prod.py
 martialmentor/settings.py
+
+# Ensure that API key for smashgg api is not added to repo:
+smashgg_api_token.txt

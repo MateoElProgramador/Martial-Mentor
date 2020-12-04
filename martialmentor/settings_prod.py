@@ -14,6 +14,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -150,3 +151,9 @@ LOGOUT_REDIRECT_URL = 'mentor:index'
 # Email:
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
+
+# Get smashgg API key from .env file, and load into os.environ for use by the smashggAPI package:
+# TODO: Quite convoluted, should centralise environment variables
+env_dir = BASE_DIR + '\martialmentor\.env'
+load_dotenv(dotenv_path=env_dir)
+os.environ['SMASHGG_API_KEY'] = os.getenv('SMASHGG_API_KEY')

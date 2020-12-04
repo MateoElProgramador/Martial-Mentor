@@ -1,4 +1,6 @@
+import json
 from distutils.util import strtobool
+from smashggAPI import client as sgg_client
 
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
@@ -11,7 +13,7 @@ from django.urls import reverse_lazy, reverse
 from django.utils.safestring import mark_safe
 from django.views import generic
 
-from martialmentor.settings import STATIC_ROOT
+from martialmentor.settings import STATIC_ROOT, BASE_DIR
 from mentor.models import Game, UserCharacter, snakify, Character
 
 
@@ -49,7 +51,6 @@ def serve_char_img(x):
     else:
         grayscale_str = ' grayscale'
 
-    # return mark_safe('<img class="char_overlay_img img-fluid' + grayscale_str + '" src="' + img_url + '" alt="' + char.name + '">')
     return mark_safe(
         '<a href="' + reverse("mentor:elite_smash_toggle", args=[char.game.id]) + '?char_id=' + str(char.id) + '">'
             '<img id="' + snakify(char.name) + '" class="char_overlay_img img-fluid' + grayscale_str +
@@ -185,6 +186,131 @@ def toggle_chromakey_session(request):
     request.session['chromakey'] = str(not strtobool(request.session['chromakey'])).lower()
     print('chromakey session is now', request.session['chromakey'])
     return HttpResponse('ok')
+
+
+# Insights:
+def insights(request, game_id):
+    game = get_object_or_404(Game, pk=game_id)
+    print("Let's show some insights")
+
+    # print('About to check that .env..')
+    # env_dir = BASE_DIR + '\martialmentor\.env'
+    # print('.env path:', env_dir)
+    # load_dotenv(dotenv_path=env_dir)
+    # print('API Key:', os.getenv('SMASHGG_API_KEY'))
+
+    query = '''
+        query TournamentQuery($slug: String, $perPage: Int) {
+            tournament(slug: $slug){
+                id
+                name
+                events {
+                    id
+                    name
+            standings(query: {
+              perPage: $perPage,
+              page: 1
+            }){
+              nodes {
+                placement
+                entrant {
+                  id
+                  name
+                }
+              }
+            }
+                }
+            }
+        }'''
+    query_vars = '{"slug": "cac-brac-all-stars-1", "perPage": 10} '
+    # result = sgg_client.query(query, query_vars)
+    # print(result)
+
+    # -- Slugs to identify specific players: -- #
+    # Mateo:
+    user_slug = 'b1bbac32'
+    # K.p:
+    user_slug = '653c25e1'
+    # Moo$:
+    user_slug = 'a9b92e44'
+
+    # Get player id and gamertag from user slug:
+    user_player_query = '''
+        query GetPlayerIdFromUserSlug($slug: String) {
+          user(slug: $slug) {
+            id
+            player {
+              id
+              gamerTag
+            }
+          }
+        }'''
+    player_details = sgg_client.query(user_player_query, '{"slug": "'+user_slug+'"}')
+
+    # Extract various IDs from player details query:
+    player_id = player_details['data']['user']['player']['id']
+    user_id = player_details['data']['user']['id']
+    user_gamertag = player_details['data']['user']['player']['gamerTag']
+
+    # Query for finding results of last 10 tournament sets of user, given user slug:
+    recent_sets_query = '''
+            query SetHistoryQuery($slug: String) {
+                user(slug: $slug) {
+                player {
+                  gamerTag
+                  sets(page: 1, perPage: 10) {
+                    pageInfo {
+                      total
+                    }
+                    nodes {
+                      completedAt
+                      displayScore
+                      event {
+                        tournament {
+                          name
+                        }
+                      }
+                      fullRoundText
+                      lPlacement
+                      winnerId
+                      slots(includeByes: false) {
+                        entrant{
+                          id name
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }'''
+    recent_sets_query_vars = '{"slug": "' + user_slug + '"}'
+
+    # Get recent sets of given player:
+    recent_sets_result = sgg_client.query(recent_sets_query, recent_sets_query_vars)
+
+    i = 0
+
+    # Find out whether given player was the winner in each set, and add 'win' key to each set entry:
+    for p_set in recent_sets_result['data']['user']['player']['sets']['nodes']:
+        print(p_set['winnerId'], ' VS ', player_id)
+
+        # If entrant id of first entrant == winnerId, AND gamertag of first entrant == user_gamertag, then they won
+        if (p_set['winnerId'] == p_set['slots'][0]['entrant']['id']) & (p_set['slots'][0]['entrant']['name'] == user_gamertag):
+            p_set['win'] = 'true'
+        # Same as above but in the event of the winner being the second listed entrant:
+        elif (p_set['winnerId'] == p_set['slots'][1]['entrant']['id']) & (p_set['slots'][1]['entrant']['name'] == user_gamertag):
+            p_set['win'] = 'true'
+        else:
+            p_set['win'] = 'false'
+
+    # Put recent sets data into formatted string:
+    recent_sets_result_str = json.dumps(recent_sets_result, indent=4)
+    print(recent_sets_result_str)
+
+    # Can't remember what this does, maybe convert string to JSON?
+    # recent_sets_result_json = json.loads(recent_sets_result)
+
+    return render(request, 'mentor/insights.html', {'game': game, 'recent_sets_result': recent_sets_result})
 
 
 class CustomUserCreationForm(UserCreationForm):

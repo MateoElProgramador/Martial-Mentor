@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+{% load static %}
+{% block title %}{{game}}: Insights{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h2>{{game}} Insights</h2>
+
+    <div class="container-fluid">
+        {% for p_set in recent_sets_result.data.user.player.sets.nodes %}
+            {% if p_set.displayScore != 'DQ' %}
+                {% if p_set.win == 'true' %}
+                    <p class="text-success">{{p_set.displayScore}}</p>
+                {% else %}
+                    <p class="text-danger">{{p_set.displayScore}}</p>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+    </div>
+
+
+
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+    {% csrf_token %}
+<!--    <script src="{% static 'mentor/scripts/char_overlay.js' %}"></script>-->
+{% endblock %}

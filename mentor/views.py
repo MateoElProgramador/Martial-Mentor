@@ -326,7 +326,48 @@ def insights(request, game_id):
     # Can't remember what this does, maybe convert string to JSON?
     # recent_sets_result_json = json.loads(recent_sets_result)
 
-    return render(request, 'mentor/insights.html', {'game': game, 'recent_sets_result': recent_sets_result})
+    # Get player's placements of 10 most recent tournaments:
+    recent_placements_query = '''query GetPlayerPlacements($slug: String, $gamertag: String) {
+          user(slug: $slug) {
+                events(query: {
+              page: 1,
+              perPage: 10
+            }) {
+              nodes {
+              slug
+                tournament {
+                  name
+                  slug
+                }
+                numEntrants
+                standings(query: {
+                  filter: {
+                    search: {
+                      fieldsToSearch: "gamerTag"
+                      searchString: $gamertag
+                    }
+                  }
+                }) {
+                  nodes {
+                    placement
+                  }
+                }
+              }
+            }
+          }
+        }'''
+    recent_placements_vars = '{"slug": "' + user_slug + '", "gamertag": "' + user_gamertag + '"}'
+    recent_placements = sgg_client.query(recent_placements_query, recent_placements_vars)
+
+    for placement in recent_placements['data']['user']['events']['nodes']:
+        placement['topPerc'] = round((placement['standings']['nodes'][0]['placement'] / placement['numEntrants']) * 100)
+
+    recent_placements_str = json.dumps(recent_placements, indent=4)
+    print(recent_placements_str)
+
+    return render(request, 'mentor/insights.html',
+                  {'game': game, 'recent_sets_result': recent_sets_result, 'recent_placements': recent_placements,
+                   'user_gamertag': user_gamertag})
 
 
 class CustomUserCreationForm(UserCreationForm):

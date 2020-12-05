@@ -3,8 +3,9 @@
 {% block title %}{{game}}: Insights{% endblock %}
 
 {% block content %}
+{% load humanize %}
 <h2 class="m-3">{{game}}: Insights</h2>
-<div class="container my-3">
+<div class="container-fluid my-3">
 
     <form action="{% url 'mentor:insights' game.id %}" method="post" class="my-2">
         {% csrf_token %}
@@ -19,21 +20,43 @@
     </form>
 
     <h4 class="my-3">{{user_gamertag}}'s Stats</h4>
-    <div class="card bg_grey" style="display: inline-block;">
-        <div class="card-body">
-            <h4 class="card-title">Most Recent Sets</h4>
-            {% for p_set in recent_sets_result.data.user.player.sets.nodes %}
-                {% if p_set.displayScore != 'DQ' %}
-                    {% if p_set.win == 'true' %}
-                        <p class="text-success">{{p_set.displayScore}}</p>
-                    {% else %}
-                        <p class="text-danger">{{p_set.displayScore}}</p>
-                    {% endif %}
-                {% endif %}
-            {% endfor %}
-        </div>
-    </div>
 
+    <div class="row p-3">
+
+        <div class="col-lg-2 card bg_grey m-2"  >
+            <div class="card-body">
+                <h4 class="card-title">Most Recent Sets</h4>
+                {% for p_set in recent_sets_result.data.user.player.sets.nodes %}
+                    {% if p_set.displayScore != 'DQ' %}
+                        {% if p_set.win == 'true' %}
+                            <p class="text-success">{{p_set.displayScore}}</p>
+                        {% else %}
+                            <p class="text-danger">{{p_set.displayScore}}</p>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="col-lg-4 card bg_grey m-2">
+            <div class="card-body">
+                <h4 class="card-title">Recent Tournament Placings</h4>
+                {% for placement in recent_placements.data.user.events.nodes %}
+                <div class="row my-2">
+                    <div class="col-9">
+                        <a href="http://www.smash.gg/{{placement.slug}}/overview">{{placement.tournament.name}}:</a><br/>
+                        <strong>{{placement.standings.nodes.0.placement|ordinal}}</strong> of {{placement.numEntrants}}
+                    </div>
+
+                    <div class="col-3">
+                        <strong>(top {{placement.topPerc}}%)</strong>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
 
 </div>
 {% endblock %}

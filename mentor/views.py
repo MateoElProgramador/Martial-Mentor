@@ -296,7 +296,6 @@ def insights(request, game_id):
 
     # Find out whether given player was the winner in each set, and add 'win' key to each set entry:
     for i, p_set in enumerate(recent_sets_result['data']['user']['player']['sets']['nodes']):
-        # print(p_set['winnerId'], ' VS ', player_id)
 
         # If set is a DQ (disqualification), then mark this index for deletion:
         # --- NOT USED, since it's quicker to skip over DQs in the template with a simple if,
@@ -305,11 +304,13 @@ def insights(request, game_id):
         #     print('Set', i, 'is a DQ')
         #     dq_inds.append(i)
 
-        # If entrant id of first entrant == winnerId, AND gamertag of first entrant == user_gamertag, then they won
-        if (p_set['winnerId'] == p_set['slots'][0]['entrant']['id']) & (p_set['slots'][0]['entrant']['name'] == user_gamertag):
+        # If entrant id of first entrant == winnerId, AND user gamertag is substring of first entrant, then they won
+        # Note: Checking that user_gamertag is in entrant name is to avoid discrepancies between gamertags from user
+        # not containing sponsors, e.g. 'Hungrybox' and 'Liquid | Hungrybox'
+        if (p_set['winnerId'] == p_set['slots'][0]['entrant']['id']) & (user_gamertag in p_set['slots'][0]['entrant']['name']):
             p_set['win'] = 'true'
         # Same as above but in the event of the winner being the second listed entrant:
-        elif (p_set['winnerId'] == p_set['slots'][1]['entrant']['id']) & (p_set['slots'][1]['entrant']['name'] == user_gamertag):
+        elif (p_set['winnerId'] == p_set['slots'][1]['entrant']['id']) & (user_gamertag in p_set['slots'][1]['entrant']['name']):
             p_set['win'] = 'true'
         else:
             p_set['win'] = 'false'
@@ -359,11 +360,12 @@ def insights(request, game_id):
     recent_placements_vars = '{"slug": "' + user_slug + '", "gamertag": "' + user_gamertag + '"}'
     recent_placements = sgg_client.query(recent_placements_query, recent_placements_vars)
 
+    # Calculate top percentage based on tournament placements, and add to dict:
     for placement in recent_placements['data']['user']['events']['nodes']:
         placement['topPerc'] = round((placement['standings']['nodes'][0]['placement'] / placement['numEntrants']) * 100)
 
     recent_placements_str = json.dumps(recent_placements, indent=4)
-    print(recent_placements_str)
+    # print(recent_placements_str)
 
     return render(request, 'mentor/insights.html',
                   {'game': game, 'recent_sets_result': recent_sets_result, 'recent_placements': recent_placements,

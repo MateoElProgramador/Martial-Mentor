@@ -193,12 +193,6 @@ def insights(request, game_id):
     game = get_object_or_404(Game, pk=game_id)
     print("Let's show some insights")
 
-    # print('About to check that .env..')
-    # env_dir = BASE_DIR + '\martialmentor\.env'
-    # print('.env path:', env_dir)
-    # load_dotenv(dotenv_path=env_dir)
-    # print('API Key:', os.getenv('SMASHGG_API_KEY'))
-
     query = '''
         query TournamentQuery($slug: String, $perPage: Int) {
             tournament(slug: $slug){
@@ -222,17 +216,26 @@ def insights(request, game_id):
                 }
             }
         }'''
-    query_vars = '{"slug": "cac-brac-all-stars-1", "perPage": 10} '
+    query_vars = '{"slug": "cac-brac-all-stars-1", "perPage": 10}'
     # result = sgg_client.query(query, query_vars)
     # print(result)
 
-    # -- Slugs to identify specific players: -- #
-    # Mateo:
-    user_slug = 'b1bbac32'
-    # K.p:
-    user_slug = '653c25e1'
-    # Moo$:
-    user_slug = 'a9b92e44'
+    opponent_slug = ''
+
+    if request.method == "POST":
+        user_slug = request.POST['slug1']
+        # Get slug of opponent if not blank:
+        if request.POST['slug2']:
+            opponent_slug = request.POST['slug2']
+
+    else:
+        # -- Slugs to identify specific players: -- #
+        # Mateo:
+        user_slug = 'b1bbac32'
+        # K.p:
+        user_slug = '653c25e1'
+        # Moo$:
+        user_slug = 'a9b92e44'
 
     # Get player id and gamertag from user slug:
     user_player_query = '''
@@ -258,7 +261,7 @@ def insights(request, game_id):
                 user(slug: $slug) {
                 player {
                   gamerTag
-                  sets(page: 1, perPage: 10) {
+                  sets(page: 1, perPage: 15) {
                     pageInfo {
                       total
                     }
@@ -289,10 +292,18 @@ def insights(request, game_id):
     recent_sets_result = sgg_client.query(recent_sets_query, recent_sets_query_vars)
 
     i = 0
+    dq_inds = []
 
     # Find out whether given player was the winner in each set, and add 'win' key to each set entry:
-    for p_set in recent_sets_result['data']['user']['player']['sets']['nodes']:
-        print(p_set['winnerId'], ' VS ', player_id)
+    for i, p_set in enumerate(recent_sets_result['data']['user']['player']['sets']['nodes']):
+        # print(p_set['winnerId'], ' VS ', player_id)
+
+        # If set is a DQ (disqualification), then mark this index for deletion:
+        # --- NOT USED, since it's quicker to skip over DQs in the template with a simple if,
+        # --- than checking and recreating list in view --- #
+        # if p_set['displayScore'] == 'DQ':
+        #     print('Set', i, 'is a DQ')
+        #     dq_inds.append(i)
 
         # If entrant id of first entrant == winnerId, AND gamertag of first entrant == user_gamertag, then they won
         if (p_set['winnerId'] == p_set['slots'][0]['entrant']['id']) & (p_set['slots'][0]['entrant']['name'] == user_gamertag):
@@ -303,9 +314,14 @@ def insights(request, game_id):
         else:
             p_set['win'] = 'false'
 
+    # Only include sets which weren't a DQ:
+    # recent_sets_result['data']['user']['player']['sets']['nodes'] = \
+    #     [elem for i, elem in enumerate(recent_sets_result['data']['user']['player']['sets']['nodes'])
+    #      if i not in dq_inds]
+
     # Put recent sets data into formatted string:
     recent_sets_result_str = json.dumps(recent_sets_result, indent=4)
-    print(recent_sets_result_str)
+    # print(recent_sets_result_str)
 
     # Can't remember what this does, maybe convert string to JSON?
     # recent_sets_result_json = json.loads(recent_sets_result)

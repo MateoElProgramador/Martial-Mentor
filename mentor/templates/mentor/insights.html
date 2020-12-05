@@ -3,22 +3,36 @@
 {% block title %}{{game}}: Insights{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <h2>{{game}} Insights</h2>
+<h2 class="m-3">{{game}}: Insights</h2>
+<div class="container my-3">
 
-    <div class="container-fluid">
-        {% for p_set in recent_sets_result.data.user.player.sets.nodes %}
-            {% if p_set.displayScore != 'DQ' %}
-                {% if p_set.win == 'true' %}
-                    <p class="text-success">{{p_set.displayScore}}</p>
-                {% else %}
-                    <p class="text-danger">{{p_set.displayScore}}</p>
+    <form action="{% url 'mentor:insights' game.id %}" method="post" class="my-2">
+        {% csrf_token %}
+        <a href="#" data-toggle="tooltip" data-placement="left" title="A player's identifying slug is found on the player's profile on smash.gg. Copy the last section of the url after 'user/'">?</a>
+        <label for="slug1">Smashgg player slug:</label>
+        <input type="text" id="slug1" name="slug1" required>
+
+        <label for="slug2">(Optional) Opponent player slug:</label>
+        <input type="text" id="slug2" name="slug2">
+
+        <input type="submit" value="Get insights">
+    </form>
+
+    <h4 class="my-3">{{user_gamertag}}'s Stats</h4>
+    <div class="card bg_grey" style="display: inline-block;">
+        <div class="card-body">
+            <h4 class="card-title">Most Recent Sets</h4>
+            {% for p_set in recent_sets_result.data.user.player.sets.nodes %}
+                {% if p_set.displayScore != 'DQ' %}
+                    {% if p_set.win == 'true' %}
+                        <p class="text-success">{{p_set.displayScore}}</p>
+                    {% else %}
+                        <p class="text-danger">{{p_set.displayScore}}</p>
+                    {% endif %}
                 {% endif %}
-            {% endif %}
-        {% endfor %}
+            {% endfor %}
+        </div>
     </div>
-
-
 
 
 </div>
@@ -26,5 +40,11 @@
 
 {% block scripts %}
     {% csrf_token %}
+    <script>
+        // Activate tooltip functionality:
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip()
+        });
+    </script>
 <!--    <script src="{% static 'mentor/scripts/char_overlay.js' %}"></script>-->
 {% endblock %}

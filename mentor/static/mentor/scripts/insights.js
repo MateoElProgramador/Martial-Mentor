@@ -3,8 +3,7 @@
 $(function() {
     // Start chain of smashgg data requests (currently synchronous from each other):
     getUserDetails(user_slug);
-
-    //getRecentSets(game_id, user_slug, user_gamertag);
+    getRecentSets(game_id, user_slug);
     //getRecentPlacements(user_slug, user_gamertag);
 });
 
@@ -22,15 +21,15 @@ function getUserDetails(user_slug) {
                 // Error
                 alert(result.error_text);
             } else {  // Success
-                userDetails = result.user_details.data.user
+                userDetails = result.user_details
                 user_gamertag = userDetails.player.gamerTag
 
                 // Add newly acquired gamertag to heading:
                 $("#gamertag_header").html(user_gamertag + "'s Stats");
 
-                // Retrieve recent sets, given newly obtained user gamertag:
-                getRecentSets(game_id, user_slug, user_gamertag);
-                //getRecentPlacements(user_slug, user_gamertag);
+                // Retrieve tournament placements, given newly obtained user gamertag:
+                //getRecentSets(game_id, user_slug, user_gamertag);
+                getRecentPlacements(user_slug, user_gamertag);
             }
         }
     });
@@ -38,28 +37,25 @@ function getUserDetails(user_slug) {
 
 
 /** Sends Ajax request to obtain recent sets of player, given user slug and gamertag. */
-function getRecentSets(game_id, user_slug, user_gamertag) {
+function getRecentSets(game_id, user_slug) {
     $.ajax({
       url: "/get-recent-sets/",
       type: 'POST',
-      data: {game_id: game_id, user_slug: user_slug, user_gamertag: user_gamertag},
+      data: {game_id: game_id, user_slug: user_slug},
         success: function(response) {
             result = JSON.parse(response);
             if (result.error) {
                 // Error
                 alert(result.error_text);
             } else {  // Success
-                sets = result.recent_sets.data
-                user_gamertag = sets.user.player.gamerTag
+                sets = result.recent_sets
+                user_gamertag = sets.gamerTag
 
                 // Add sets content to page:
                 populateRecentSets(sets);
 
                 // Now get recent tournament placings async:
-                // Note: I know that doing this basically makes the requests synchronous from each other,
-                //       but this seems to lead to faster loadtimes overall? (anecdotally, may change later)
-                // TODO: Further explore retrieval order for optimal load times
-                getRecentPlacements(user_slug, user_gamertag);
+                //getRecentPlacements(user_slug, user_gamertag);
             }
         }
     });
@@ -89,7 +85,7 @@ function getRecentPlacements(user_slug, user_gamertag) {
 /** Populates recent sets card with content based on given JSON. */
 function populateRecentSets(sets) {
     // Append each set result into the recent sets card:
-    sets.user.player.sets.nodes.forEach(set => {
+    sets.sets.nodes.forEach(set => {
         if (set.displayScore != "DQ") {
             if (set.win == 'true') {
                 $("#recent_sets_body").append('<p class="text-success">' + set.displayScore + '</p>');

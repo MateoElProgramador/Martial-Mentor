@@ -237,24 +237,6 @@ def insights(request, game_id):
         # Moo$:
         user_slug = 'a9b92e44'
 
-        # # Get player id and gamertag from user slug:
-        # user_player_query = '''
-        #             query GetPlayerIdFromUserSlug($slug: String) {
-        #               user(slug: $slug) {
-        #                 id
-        #                 player {
-        #                   id
-        #                   gamerTag
-        #                 }
-        #               }
-        #             }'''
-        # player_details = sgg_client.query(user_player_query, '{"slug": "' + user_slug + '"}')
-        #
-        # # Extract data from player details query:
-        # player_id = player_details['data']['user']['player']['id']
-        # user_id = player_details['data']['user']['id']
-        # user_gamertag = player_details['data']['user']['player']['gamerTag']
-
     return render(request, 'mentor/insights.html', {'game': game, 'method': request.method, 'user_slug': user_slug})
 
 
@@ -263,11 +245,8 @@ def recent_sets_async(request):
     if not request.is_ajax() or not request.method == 'POST':
         return HttpResponseNotAllowed(['POST'])
 
+    game = get_object_or_404(Game, pk=request.POST['game_id'])
     user_slug = request.POST['user_slug']
-    user_gamertag = request.POST['user_gamertag']
-
-    game_id = request.POST['game_id']
-    game = get_object_or_404(Game, pk=game_id)
 
     print("Recent sets async")
     print(request.POST)
@@ -312,13 +291,15 @@ def recent_sets_async(request):
     recent_sets_query_vars = '{"slug": "' + user_slug + '"}'
 
     # Get recent sets of given player:
-    recent_sets_result = sgg_client.query(recent_sets_query, recent_sets_query_vars)
+    recent_sets = sgg_client.query(recent_sets_query, recent_sets_query_vars)['data']['user']['player']
+
+    user_gamertag = recent_sets['gamerTag']
 
     i = 0
     dq_inds = []
 
     # Find out whether given player was the winner in each set, and add 'win' key to each set entry:
-    for i, p_set in enumerate(recent_sets_result['data']['user']['player']['sets']['nodes']):
+    for i, p_set in enumerate(recent_sets['sets']['nodes']):
         # If set is a DQ (disqualification), then mark this index for deletion:
         # --- NOT USED, since it's quicker to skip over DQs in the template with a simple if,
         # --- than checking and recreating list in view --- #
@@ -341,7 +322,12 @@ def recent_sets_async(request):
         else:
             p_set['win'] = 'false'
 
-    response = {'recent_sets': recent_sets_result}
+        # Only include sets which weren't a DQ:
+        # recent_sets_result['data']['user']['player']['sets']['nodes'] = \
+        #     [elem for i, elem in enumerate(recent_sets_result['data']['user']['player']['sets']['nodes'])
+        #      if i not in dq_inds]
+
+    response = {'recent_sets': recent_sets}
     return HttpResponse(json.dumps(response))
 
 
@@ -350,33 +336,23 @@ def user_details_async(request):
     if not request.is_ajax() or not request.method == 'POST':
         return HttpResponseNotAllowed(['POST'])
 
-    user_details, _, _, _ = get_user_details(request.POST['user_slug'])
-    response = {'user_details': user_details}
-    return HttpResponse(json.dumps(response))
+    user_slug = request.POST['user_slug']
 
-
-def get_user_details(user_slug):
-    """ Get and return details of user using smashgg API, given user slug.
-        Called by recent_sets_async view. """
     # Get player id and gamertag from user slug:
     user_player_query = '''
-                query GetPlayerIdFromUserSlug($slug: String) {
-                  user(slug: $slug) {
-                    id
-                    player {
-                      id
-                      gamerTag
-                    }
-                  }
-                }'''
-    player_details = sgg_client.query(user_player_query, '{"slug": "' + user_slug + '"}')
+                    query GetPlayerIdFromUserSlug($slug: String) {
+                      user(slug: $slug) {
+                        id
+                        player {
+                          id
+                          gamerTag
+                        }
+                      }
+                    }'''
+    user_details = sgg_client.query(user_player_query, '{"slug": "' + user_slug + '"}')['data']['user']
 
-    # Extract data from player details query:
-    player_id = player_details['data']['user']['player']['id']
-    user_id = player_details['data']['user']['id']
-    user_gamertag = player_details['data']['user']['player']['gamerTag']
-
-    return player_details, player_id, user_id, user_gamertag
+    response = {'user_details': user_details}
+    return HttpResponse(json.dumps(response))
 
 
 def recent_placements_async(request):

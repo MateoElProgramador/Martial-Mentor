@@ -19,40 +19,21 @@
         <input type="submit" value="Get insights">
     </form>
 
-    <h4 class="my-3">{{user_gamertag}}'s Stats</h4>
+    <h4 id="gamertag_header" class="my-3"></h4>
 
     <div class="row p-3">
 
-        <div class="col-lg-2 card bg_grey m-2"  >
-            <div class="card-body">
+        <div id="recent_sets_card" class="col-lg-2 card bg_grey m-2"  >
+            <div id="recent_sets_body" class="card-body">
                 <h4 class="card-title">Most Recent Sets</h4>
-                {% for p_set in recent_sets_result.data.user.player.sets.nodes %}
-                    {% if p_set.displayScore != 'DQ' %}
-                        {% if p_set.win == 'true' %}
-                            <p class="text-success">{{p_set.displayScore}}</p>
-                        {% else %}
-                            <p class="text-danger">{{p_set.displayScore}}</p>
-                        {% endif %}
-                    {% endif %}
-                {% endfor %}
+
             </div>
         </div>
 
         <div class="col-lg-4 card bg_grey m-2">
-            <div class="card-body">
+            <div id="recent_placements_body" class="card-body">
                 <h4 class="card-title">Recent Tournament Placings</h4>
-                {% for placement in recent_placements.data.user.events.nodes %}
-                <div class="row my-2">
-                    <div class="col-9">
-                        <a href="http://www.smash.gg/{{placement.slug}}/overview">{{placement.tournament.name}}:</a><br/>
-                        <strong>{{placement.standings.nodes.0.placement|ordinal}}</strong> of {{placement.numEntrants}}
-                    </div>
 
-                    <div class="col-3">
-                        <strong>(top {{placement.topPerc}}%)</strong>
-                    </div>
-                </div>
-                {% endfor %}
             </div>
         </div>
 
@@ -63,11 +44,19 @@
 
 {% block scripts %}
     {% csrf_token %}
+
     <script>
         // Activate tooltip functionality:
         $(function () {
             $('[data-toggle="tooltip"]').tooltip()
         });
+
+        // Get variables from server:
+        var game_id = {{game.id}};
+        var method = "{{method}}";
+        var user_slug = "{{user_slug}}";
     </script>
-<!--    <script src="{% static 'mentor/scripts/char_overlay.js' %}"></script>-->
+
+    <script src="{% static 'mentor/scripts/char_overlay.js' %}"></script>
+    <script src="{% static 'mentor/scripts/insights.js' %}"></script>
 {% endblock %}

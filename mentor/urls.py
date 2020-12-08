@@ -3,7 +3,8 @@ from django.urls import path
 
 from martialmentor.settings import STATIC_URL, STATIC_ROOT
 from mentor import views
-from mentor.views import SignUpView, character_overlay, elite_smash_toggle, toggle_chromakey_session, insights
+from mentor.views import SignUpView, character_overlay, elite_smash_toggle, toggle_chromakey_session, insights, \
+    recent_sets_async, recent_placements_async, user_details_async
 
 app_name = 'mentor'
 
@@ -19,6 +20,10 @@ urlpatterns = [
 
     # Insights:
     path('game/<int:game_id>/insights/', insights, name='insights'),
+    # Insights paths used by Ajax to fetch data:
+    path('get-user-details/', user_details_async),
+    path('get-recent-sets/', recent_sets_async),
+    path('get-recent-placements/', recent_placements_async),
 
     path('signup/', SignUpView.as_view(), name='signup'),
 ]

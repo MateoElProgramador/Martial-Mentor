@@ -263,7 +263,7 @@ def recent_sets_async(request):
                     user(slug: $slug) {
                     player {
                       gamerTag
-                      sets(page: 1, perPage: 15) {
+                      sets(page: 1, perPage: 30) {
                         pageInfo {
                           total
                         }
@@ -338,6 +338,8 @@ def recent_sets_async(request):
         [elem for i, elem in enumerate(recent_sets['sets']['nodes'])
          if i not in del_inds]
 
+    recent_sets['sets']['nodes'] = recent_sets['sets']['nodes'][:15]        # Cap displayed sets to 15
+
     # print(json.dumps(recent_sets, indent=4))
     response = {'recent_sets': recent_sets}
     return HttpResponse(json.dumps(response))
@@ -372,6 +374,7 @@ def recent_placements_async(request):
     if not request.is_ajax() or not request.method == 'POST':
         return HttpResponseNotAllowed(['POST'])
 
+    game = get_object_or_404(Game, pk=request.POST['game_id'])
     user_slug = request.POST['user_slug']
     user_gamertag = request.POST['user_gamertag']
 
@@ -380,13 +383,16 @@ def recent_placements_async(request):
               user(slug: $slug) {
                     events(query: {
                   page: 1,
-                  perPage: 10
+                  perPage: 30
                 }) {
                   nodes {
+                  name
                   slug
+                  videogame {
+                    name
+                  }
                     tournament {
                       name
-                      slug
                     }
                     numEntrants
                     standings(query: {
@@ -406,13 +412,25 @@ def recent_placements_async(request):
               }
             }'''
     recent_placements_vars = '{"slug": "' + user_slug + '", "gamertag": "' + user_gamertag + '"}'
-    recent_placements = sgg_client.query(recent_placements_query, recent_placements_vars)
+    recent_placements = sgg_client.query(recent_placements_query, recent_placements_vars)['data']['user']['events']['nodes']
+
+    del_inds = []
 
     # Calculate top percentage based on tournament placements, and add to dict:
-    for placement in recent_placements['data']['user']['events']['nodes']:
+    for i, placement in enumerate(recent_placements):
+        # Identify indices of placements of wrong videogame:
+        if placement['videogame']['name'] != game.title:
+            print(placement['tournament']['name'], 'is not', game.title, ', it is', placement['videogame']['name'])
+            del_inds.append(i)
+            continue
+
         placement['topPerc'] = round((placement['standings']['nodes'][0]['placement'] / placement['numEntrants']) * 100)
 
-    response = {'placements': recent_placements['data']['user']['events']['nodes']}
+    # Filter out placements not for this videogame:
+    recent_placements = [elem for i, elem in enumerate(recent_placements) if i not in del_inds]
+    recent_placements = recent_placements[:10]       # Cap number of placements displayed
+
+    response = {'placements': recent_placements}
     return HttpResponse(json.dumps(response))
 
 

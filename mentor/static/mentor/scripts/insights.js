@@ -1,11 +1,15 @@
 
 // When document ready:
 $(function() {
-    user_gamertag = getUserDetails(user_slug);
-    getRecentSets(game_id, user_slug);
+    // Start chain of smashgg data requests (currently synchronous from each other):
+    getUserDetails(user_slug);
+
+    //getRecentSets(game_id, user_slug, user_gamertag);
     //getRecentPlacements(user_slug, user_gamertag);
 });
 
+
+/** Sends Ajax request to obtain the gamertag of a user, given their user slug. */
 function getUserDetails(user_slug) {
     var user_gamertag = "";
     $.ajax({
@@ -23,17 +27,22 @@ function getUserDetails(user_slug) {
 
                 // Add newly acquired gamertag to heading:
                 $("#gamertag_header").html(user_gamertag + "'s Stats");
+
+                // Retrieve recent sets, given newly obtained user gamertag:
+                getRecentSets(game_id, user_slug, user_gamertag);
+                //getRecentPlacements(user_slug, user_gamertag);
             }
         }
     });
-    return user_gamertag;
 }
 
-function getRecentSets(game_id, user_slug) {
+
+/** Sends Ajax request to obtain recent sets of player, given user slug and gamertag. */
+function getRecentSets(game_id, user_slug, user_gamertag) {
     $.ajax({
       url: "/get-recent-sets/",
       type: 'POST',
-      data: {game_id: game_id, user_slug: user_slug},
+      data: {game_id: game_id, user_slug: user_slug, user_gamertag: user_gamertag},
         success: function(response) {
             result = JSON.parse(response);
             if (result.error) {
@@ -47,6 +56,9 @@ function getRecentSets(game_id, user_slug) {
                 populateRecentSets(sets);
 
                 // Now get recent tournament placings async:
+                // Note: I know that doing this basically makes the requests synchronous from each other,
+                //       but this seems to lead to faster loadtimes overall? (anecdotally, may change later)
+                // TODO: Further explore retrieval order for optimal load times
                 getRecentPlacements(user_slug, user_gamertag);
             }
         }
@@ -54,6 +66,7 @@ function getRecentSets(game_id, user_slug) {
 }
 
 
+/** Sends Ajax request to obtain recent tournament placements of a player, given their user slug and gamertag. */
 function getRecentPlacements(user_slug, user_gamertag) {
     $.ajax({
       url: "/get-recent-placements/",

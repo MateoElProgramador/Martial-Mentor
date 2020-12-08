@@ -264,10 +264,7 @@ def recent_sets_async(request):
         return HttpResponseNotAllowed(['POST'])
 
     user_slug = request.POST['user_slug']
-    print('User slugg:', user_slug)
-
-    # Get user details from slug:
-    _, player_id, user_id, user_gamertag = get_user_details(user_slug)
+    user_gamertag = request.POST['user_gamertag']
 
     game_id = request.POST['game_id']
     game = get_object_or_404(Game, pk=game_id)

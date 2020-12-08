@@ -271,6 +271,10 @@ def recent_sets_async(request):
                           completedAt
                           displayScore
                           event {
+                            name
+                            videogame {
+                              name
+                            }
                             tournament {
                               name
                             }
@@ -296,7 +300,7 @@ def recent_sets_async(request):
     user_gamertag = recent_sets['gamerTag']
 
     i = 0
-    dq_inds = []
+    del_inds = []
 
     # Find out whether given player was the winner in each set, and add 'win' key to each set entry:
     for i, p_set in enumerate(recent_sets['sets']['nodes']):
@@ -306,6 +310,13 @@ def recent_sets_async(request):
         # if p_set['displayScore'] == 'DQ':
         #     print('Set', i, 'is a DQ')
         #     dq_inds.append(i)
+
+        # Collate indices of sets not for this game:
+        if p_set['event']['videogame']['name'] != game.title:
+            print(p_set['event']['tournament']['name'], 'is not', game.title, ', it is', p_set['event']['videogame']['name'])
+            del_inds.append(i)
+            continue
+
 
         # If entrant id of first entrant == winnerId, AND user gamertag is substring of first entrant, then they won
         # Note: Checking that user_gamertag is in entrant name is to avoid discrepancies between gamertags from user
@@ -322,11 +333,12 @@ def recent_sets_async(request):
         else:
             p_set['win'] = 'false'
 
-        # Only include sets which weren't a DQ:
-        # recent_sets_result['data']['user']['player']['sets']['nodes'] = \
-        #     [elem for i, elem in enumerate(recent_sets_result['data']['user']['player']['sets']['nodes'])
-        #      if i not in dq_inds]
+    # Filter out sets not for this videogame:
+    recent_sets['sets']['nodes'] = \
+        [elem for i, elem in enumerate(recent_sets['sets']['nodes'])
+         if i not in del_inds]
 
+    # print(json.dumps(recent_sets, indent=4))
     response = {'recent_sets': recent_sets}
     return HttpResponse(json.dumps(response))
 

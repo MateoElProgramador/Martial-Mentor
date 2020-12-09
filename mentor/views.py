@@ -322,6 +322,12 @@ def recent_sets_async(request):
             del_inds.append(i)
             continue
 
+        # If set is a DQ (disqualification), then mark this index for deletion:
+        if p_set['displayScore'] == 'DQ':
+            print('Set', i, 'is a DQ')
+            del_inds.append(i)
+            continue
+
         # If entrant id of first entrant == winnerId, AND user gamertag is substring of first entrant, then they won
         # Note: Checking that user_gamertag is in entrant name is to avoid discrepancies between gamertags from user
         # not containing sponsors, e.g. 'Hungrybox' and 'Liquid | Hungrybox. This could cause issues if one player's
@@ -487,7 +493,8 @@ def set_history_async(request):
     # set_history = sgg_client.query(set_history_query, set_history_vars)
 
     # set_hist_inds = []
-    set_history = []
+    win_count = 0
+    set_history = {'winCount': 0, 'sets': []}
 
     print('Opponent gamertag:', opponent_gamertag)
     # print(json.dumps(sets, indent=4))
@@ -497,7 +504,11 @@ def set_history_async(request):
         if (opponent_gamertag in p_set['slots'][0]['entrant']['name']) or (opponent_gamertag in p_set['slots'][1]['entrant']['name']):
             # set_hist_inds.append(i)
             print('Aha!')
-            set_history.append(p_set)
+            set_history['sets'].append(p_set)
+            if p_set['win'] == 'true':
+                win_count += 1
+
+    set_history['winCount'] = win_count
 
     print(set_history)
 

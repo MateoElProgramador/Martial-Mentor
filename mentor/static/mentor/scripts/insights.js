@@ -111,20 +111,17 @@ function populateRecentSets(sets) {
     var dqNum = 0
     // Append each set result into the recent sets card:
     sets.sets.nodes.every((set, i) => {
-        if (set.displayScore == "DQ") {
-            dqNum++;
+        var textClass = ""
+        if (set.win == "true") {
+            textClass = "text-success";
         } else {
-            var textClass = ""
-            if (set.win == "true") {
-                textClass = "text-success";
-            } else {
-                textClass = "text-danger";
-            }
-            $("#recent_sets_body").append('<p class="' + textClass + '">' + set.displayScore + '</p>');
-
-            // Only display the first 15 sets:
-            if (i-dqNum >= 14) { return false; }
+            textClass = "text-danger";
         }
+        $("#recent_sets_body").append('<p class="' + textClass + '">' + set.displayScore + '</p>');
+
+        // Only display the first 15 sets:
+        if (i >= 14) { return false; }
+
         return true;
     });
 }
@@ -146,13 +143,14 @@ function populateRecentPlacements(placements) {
     });
 }
 
-/** Populates recent sets card with content based on given JSON. */
+/** Populates set history card with content based on given JSON. */
 function populateSetHistory(sets) {
 
-//    $('#set_history_ratio').html("Recent win rate: " + )
+    $('#set_history_ratio').html("Recent win rate: " + sets.winCount + " out of " + sets.sets.length +
+                                    " (" + Math.round((sets.winCount / sets.sets.length) * 100) + "%)");
 
     // Append each set result into the recent sets card:
-    sets.every((set, i) => {
+    sets.sets.every((set, i) => {
         var textClass = ""
         if (set.win == "true") {
             textClass = "text-success";

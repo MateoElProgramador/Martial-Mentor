@@ -147,6 +147,7 @@ function populateRecentPlacements(placements) {
 /** Populates set history card with content based on given JSON. */
 function populateSetHistory(sets) {
 
+    $("#set_history_title").html("Set History: " + user_gamertag + " vs " + sets.opponentGamertag);
     $('#set_history_ratio').html("Recent win rate: " + sets.winCount + " out of " + sets.sets.length +
                                     " (" + Math.round((sets.winCount / sets.sets.length) * 100) + "%)");
 

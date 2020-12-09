@@ -260,7 +260,7 @@ def recent_sets_async(request):
         set_num = 100
     else:
         opponent_slug = ''
-        set_num = 70
+        set_num = 80
 
     # Query for finding results of last 10 tournament sets of user, given user slug:
     recent_sets_query = '''
@@ -494,7 +494,7 @@ def set_history_async(request):
 
     # set_hist_inds = []
     win_count = 0
-    set_history = {'winCount': 0, 'sets': []}
+    set_history = {'opponentGamertag': opponent_gamertag, 'winCount': 0, 'sets': []}
 
     print('Opponent gamertag:', opponent_gamertag)
     # print(json.dumps(sets, indent=4))

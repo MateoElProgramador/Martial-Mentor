@@ -108,7 +108,8 @@ function getSetHistory(user_slug, user_gamertag, sets) {
 
 /** Populates recent sets card with content based on given JSON. */
 function populateRecentSets(sets) {
-    var dqNum = 0
+    $('#recent_sets_ratio').html("Recent win rate: " + sets.winCount + " out of " + sets.sets.nodes.length +
+                                    " (" + Math.round((sets.winCount / sets.sets.nodes.length) * 100) + "%)");
     // Append each set result into the recent sets card:
     sets.sets.nodes.every((set, i) => {
         var textClass = ""

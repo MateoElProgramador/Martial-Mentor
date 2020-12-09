@@ -260,7 +260,7 @@ def recent_sets_async(request):
         set_num = 100
     else:
         opponent_slug = ''
-        set_num = 30
+        set_num = 70
 
     # Query for finding results of last 10 tournament sets of user, given user slug:
     recent_sets_query = '''
@@ -306,15 +306,10 @@ def recent_sets_async(request):
 
     i = 0
     del_inds = []
+    win_count = 0
 
     # Find out whether given player was the winner in each set, and add 'win' key to each set entry:
     for i, p_set in enumerate(recent_sets['sets']['nodes']):
-        # If set is a DQ (disqualification), then mark this index for deletion:
-        # --- NOT USED, done in JS instead ---
-        # if p_set['displayScore'] == 'DQ':
-        #     print('Set', i, 'is a DQ')
-        #     del_inds.append(i)
-        #     continue
 
         # Collate indices of sets not for this game:
         if p_set['event']['videogame']['name'] != game.title:
@@ -336,12 +331,17 @@ def recent_sets_async(request):
         if (p_set['winnerId'] == p_set['slots'][0]['entrant']['id']) & (
                 user_gamertag in p_set['slots'][0]['entrant']['name']):
             p_set['win'] = 'true'
+            win_count += 1
         # Same as above but in the event of the winner being the second listed entrant:
         elif (p_set['winnerId'] == p_set['slots'][1]['entrant']['id']) & (
                 user_gamertag in p_set['slots'][1]['entrant']['name']):
             p_set['win'] = 'true'
+            win_count += 1
         else:
             p_set['win'] = 'false'
+
+    # Add win count to dictionary:
+    recent_sets['winCount'] = win_count
 
     # Filter out sets not for this videogame:
     recent_sets['sets']['nodes'] = \

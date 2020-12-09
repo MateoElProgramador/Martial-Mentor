@@ -54,6 +54,11 @@ function getRecentSets(game_id, user_slug) {
                 // Add sets content to page:
                 populateRecentSets(sets);
 
+                // Get set history if two user slugs have been entered in form:
+                if (opponent_slug != "") {
+                    getSetHistory(user_slug, user_gamertag, sets);
+                }
+
                 // Now get recent tournament placings async:
                 //getRecentPlacements(user_slug, user_gamertag);
             }
@@ -81,18 +86,46 @@ function getRecentPlacements(user_slug, user_gamertag) {
     });
 }
 
+/** Sends Ajax request to get set history between two players, given their user slugs. */
+function getSetHistory(user_slug, user_gamertag, sets) {
+    $.ajax({
+      url: "/get-set-history/",
+      type: 'POST',
+      data: {game_id: game_id, user_slug: user_slug, opponent_slug: opponent_slug, user_gamertag: user_gamertag, sets: JSON.stringify(sets)},
+        success: function(response) {
+            result = JSON.parse(response);
+            if (result.error) {
+                // Error
+                alert(result.error_text);
+            } else {  // Success
+                setHistory = result.set_history;
+                populateSetHistory(setHistory);
+            }
+        }
+    });
+}
+
 
 /** Populates recent sets card with content based on given JSON. */
 function populateRecentSets(sets) {
+    var dqNum = 0
     // Append each set result into the recent sets card:
-    sets.sets.nodes.forEach(set => {
-        if (set.displayScore != "DQ") {
-            if (set.win == 'true') {
-                $("#recent_sets_body").append('<p class="text-success">' + set.displayScore + '</p>');
+    sets.sets.nodes.every((set, i) => {
+        if (set.displayScore == "DQ") {
+            dqNum++;
+        } else {
+            var textClass = ""
+            if (set.win == "true") {
+                textClass = "text-success";
             } else {
-                $("#recent_sets_body").append('<p class="text-danger">' + set.displayScore + '</p>');
+                textClass = "text-danger";
             }
+            $("#recent_sets_body").append('<p class="' + textClass + '">' + set.displayScore + '</p>');
+
+            // Only display the first 15 sets:
+            if (i-dqNum >= 14) { return false; }
         }
+        return true;
     });
 }
 
@@ -110,6 +143,28 @@ function populateRecentPlacements(placements) {
             </div>\
         </div>\
         ');
+    });
+}
+
+/** Populates recent sets card with content based on given JSON. */
+function populateSetHistory(sets) {
+
+//    $('#set_history_ratio').html("Recent win rate: " + )
+
+    // Append each set result into the recent sets card:
+    sets.every((set, i) => {
+        var textClass = ""
+        if (set.win == "true") {
+            textClass = "text-success";
+        } else {
+            textClass = "text-danger";
+        }
+        $("#set_history_body").append('<p class="' + textClass + '">' + set.displayScore + '</p>');
+
+        // Only display the first 15 sets:
+//        if (i >= 15) { return false; }
+
+        return true;
     });
 }
 

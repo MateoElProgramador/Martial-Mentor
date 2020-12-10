@@ -129,15 +129,27 @@ function populateRecentSets(sets) {
 
 /** Populates recent sets card with content based on given JSON. */
 function populateRecentPlacements(placements) {
-    // Append each set result into the recent sets card:
+    // Append placements data into card:
     placements.forEach(p => {
+        var standingsText = '';
+        var percText = ''
+
+        // Deal with tournaments with null standings accordingly:
+        if (p.topPerc == 'null') {
+            standingsText = 'N/A</strong> (No standings found)';
+            percText = 'N/A'
+        } else {
+            standingsText = p.standings.nodes[0].placement + nth(p.standings.nodes[0].placement) + '</strong> of ' + p.numEntrants;
+            percText = '<strong>(top ' + p.topPerc + '%)</strong>'
+        }
+
         $("#recent_placements_body").append('<div class="row my-2">\
             <div class="col-9">\
                 <a href="http://www.smash.gg/' + p.slug + '/overview">' + p.tournament.name + '</a><br/>\
-                <strong>' + p.standings.nodes[0].placement + nth(p.standings.nodes[0].placement) + '</strong> of ' + p.numEntrants + '\
+                <strong>' + standingsText + '\
             </div>\
             <div class="col-3">\
-                <strong>(top ' + p.topPerc + '%)</strong>\
+                ' + percText + '\
             </div>\
         </div>\
         ');

@@ -62,11 +62,18 @@ class GameIndexView(generic.ListView):
     model = Game
     template_name = 'mentor/index.html'
 
+    def get_context_data(self, **kwargs):
+        """Override get context method to add variables to context."""
+        context = super().get_context_data(**kwargs)
+        context['all_games'] = Game.objects.all()
+        return context
+
 
 def tools(request, game_id):
     """Shows list of tools for selected game. Not that useful a page, will probably remove later."""
     game = get_object_or_404(Game, pk=game_id)
-    return render(request, 'mentor/tools.html', {'game': game})
+    all_games = Game.objects.all()
+    return render(request, 'mentor/tools.html', {'game': game, 'all_games': all_games})
 
 
 class GameDetailView(generic.DetailView):
@@ -77,8 +84,6 @@ class GameDetailView(generic.DetailView):
     def get_context_data(self, **kwargs):
         """Override get context method to add variable to context."""
         context = super().get_context_data(**kwargs)
-        # context['list_60'] = 'a' * 60
-        # context['list_17'] = 'a' * 17
         # context['list_77'] = 'a' * 77
 
         game = self.object
@@ -86,8 +91,7 @@ class GameDetailView(generic.DetailView):
         print('Character num: ', char_num)
 
         context['char_num'] = char_num
-
-        # context['char_num'] = 4
+        context['all_games'] = Game.objects.all()
 
         return context
 
@@ -140,6 +144,7 @@ def character_overlay(request, game_id):
                                                             'char_data': char_data,
                                                             'body_class': body_class,
                                                             'checkbox_checked': checkbox_checked,
+                                                            'all_games': Game.objects.all(),
                                                             })
         # return render(request, 'mentor/[not used] example_char_overlay.html', {'game': game, 'user_chars': user_chars,
         #                                                     'char_num': char_num, 'char_data': char_data, 'list_77': list_77})
@@ -240,7 +245,7 @@ def insights(request, game_id):
         user_slug = 'a9b92e44'
 
     return render(request, 'mentor/insights.html', {'game': game, 'method': request.method, 'user_slug': user_slug,
-                                                    'opponent_slug': opponent_slug})
+                                                    'opponent_slug': opponent_slug, 'all_games': Game.objects.all()})
 
 
 def recent_sets_async(request):

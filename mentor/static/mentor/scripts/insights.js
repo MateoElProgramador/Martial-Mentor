@@ -25,8 +25,8 @@ function getUserDetails(user_slug) {
 
                 // Show error message if error in query (almost definitely due to invalid player slug):
                 if (userDetails == 'null') {
-                    $('#recent_sets_body').append('<div class="text-danger">Player slug does not exist</div>');
-                    $('#recent_placements_body').append('<div class="text-danger">Player slug does not exist</div>');
+                    $('#recent_sets_body').append('<div id="slug_error_text_sets" class="text-danger">Player slug does not exist</div>');
+                    $('#recent_placements_body').append('<div id="slug_error_text_placements" class="text-danger">Player slug does not exist</div>');
                     return;
                 }
 
@@ -132,7 +132,7 @@ function populateRecentSets(sets) {
         } else {
             textClass = "text-danger";
         }
-        $("#recent_sets_body").append('<p class="' + textClass + '">' + set.displayScore + '</p>');
+        $("#recent_sets_body").append('<p class="recent_set ' + textClass + '">' + set.displayScore + '</p>');
 
         // Only display the first 15 sets:
         if (i >= 14) { return false; }
@@ -157,7 +157,7 @@ function populateRecentPlacements(placements) {
             percText = '<strong>(top ' + p.topPerc + '%)</strong>'
         }
 
-        $("#recent_placements_body").append('<div class="row my-2">\
+        $("#recent_placements_body").append('<div class="recent_placing row my-2">\
             <div class="col-9">\
                 <a href="http://www.smash.gg/' + p.slug + '/overview">' + p.tournament.name + '</a><br/>\
                 <strong>' + standingsText + '\

@@ -307,7 +307,14 @@ def recent_sets_async(request):
     recent_sets_query_vars = '{"slug": "' + user_slug + '", "setNum": "' + str(set_num) + '"}'
 
     # Get recent sets of given player:
-    recent_sets = sgg_client.query(recent_sets_query, recent_sets_query_vars)['data']['user']['player']
+    recent_sets = sgg_client.query(recent_sets_query, recent_sets_query_vars)['data']['user']
+
+    # If user key points to null, then player slug doesn't exist; return blank data:
+    if recent_sets is None:
+        print('User is null!')
+        return HttpResponse(json.dumps({'recent_sets': 'null'}))
+
+    recent_sets = recent_sets['player']
 
     user_gamertag = recent_sets['gamerTag']
 
@@ -370,6 +377,10 @@ def user_details_async(request):
     user_slug = request.POST['user_slug']
     # Get user details using helper method:
     user_details = get_user_details(user_slug)
+
+    # If query doesn't find user, then flag as null in response JSON:
+    if user_details is None:
+        user_details = 'null'
 
     response = {'user_details': user_details}
     return HttpResponse(json.dumps(response))
@@ -443,7 +454,7 @@ def recent_placements_async(request):
     recent_placements_vars = '{"slug": "' + user_slug + '", "gamertag": "' + user_gamertag + '", "videogameId": "' + str(videogame_ids[game.title]) + '"}'
     recent_placements = sgg_client.query(recent_placements_query, recent_placements_vars)['data']['user']['events']['nodes']
 
-    print(json.dumps(recent_placements, indent=4))
+    # print(json.dumps(recent_placements, indent=4))
 
     del_inds = []
 

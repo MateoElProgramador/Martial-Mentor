@@ -19,9 +19,17 @@ function getUserDetails(user_slug) {
             result = JSON.parse(response);
             if (result.error) {
                 // Error
-                alert(result.error_text);
+                alert('Error in user details! Please report this to admin.\n' + result.error_text);
             } else {  // Success
                 userDetails = result.user_details
+
+                // Show error message if error in query (almost definitely due to invalid player slug):
+                if (userDetails == 'null') {
+                    $('#recent_sets_body').append('<div class="text-danger">Player slug does not exist</div>');
+                    $('#recent_placements_body').append('<div class="text-danger">Player slug does not exist</div>');
+                    return;
+                }
+
                 user_gamertag = userDetails.player.gamerTag
 
                 // Add newly acquired gamertag to heading:
@@ -46,9 +54,15 @@ function getRecentSets(game_id, user_slug) {
             result = JSON.parse(response);
             if (result.error) {
                 // Error
-                alert(result.error_text);
+                alert('Error in recent sets! Please report this to admin.\n' + result.error_text);
             } else {  // Success
                 sets = result.recent_sets
+
+                // Exit function and avoid further processing and query calls, since player slug is invalid:
+                if (sets == 'null') {
+                    return;
+                }
+
                 user_gamertag = sets.gamerTag
 
                 // Add sets content to page:
@@ -77,7 +91,7 @@ function getRecentPlacements(user_slug, user_gamertag) {
             result = JSON.parse(response);
             if (result.error) {
                 // Error
-                alert(result.error_text);
+                alert('Error in recent placements! Please report this to admin.\n' + result.error_text);
             } else {  // Success
                 placements = result.placements
                 populateRecentPlacements(placements);
@@ -96,7 +110,7 @@ function getSetHistory(user_slug, user_gamertag, sets) {
             result = JSON.parse(response);
             if (result.error) {
                 // Error
-                alert(result.error_text);
+                alert('Error in set history! Please report this to admin.\n' + result.error_text);
             } else {  // Success
                 setHistory = result.set_history;
                 populateSetHistory(setHistory);

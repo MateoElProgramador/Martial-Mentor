@@ -116,7 +116,7 @@ function getSetHistory(user_slug, user_gamertag, sets) {
 
                 // Display error message if opponent not found from slug:
                 if (setHistory == 'null') {
-                    $('#set_history_body').append('<div class="text-danger">Opponent slug does not exist</div>');
+                    $('#set_history_body').append('<div id="set_history_error_text" class="set_history text-danger">Opponent slug does not exist</div>');
                     return;
                 }
 
@@ -192,7 +192,7 @@ function populateSetHistory(sets) {
         } else {
             textClass = "text-danger";
         }
-        $("#set_history_body").append('<p class="' + textClass + '">' + set.displayScore + '</p>');
+        $("#set_history_body").append('<p class="set_history ' + textClass + '">' + set.displayScore + '</p>');
 
         // Only display the first 15 sets:
 //        if (i >= 15) { return false; }

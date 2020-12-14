@@ -16,8 +16,8 @@ class InsightsTests(MyStaticLiveServerTestCase):
     # Enter invalid slug
     # Recent sets
     # Recent placings
-
     # Invalid second slug
+
     # Set history between players
 
     def setUp(self):
@@ -107,4 +107,18 @@ class InsightsTests(MyStaticLiveServerTestCase):
 
     def test_invalid_second_slug(self):
         """When an invalid player slug is entered for the opponent, an error message is displayed."""
+        s = self.selenium
+        s.get(self.live_server_url + reverse('mentor:insights', args=[self.game.id]))
 
+        s.find_element_by_name('slug1').send_keys('a9b92e44')
+        s.find_element_by_name('slug2').send_keys('aaaaaaaaaaaaaaaaaaaa')
+        s.find_element_by_id('slugSubmit').click()
+
+        # Wait max 5 seconds for set history to be retrieved:
+        element = WebDriverWait(s, 5).until(
+            expected_conditions.presence_of_all_elements_located((By.CLASS_NAME, "set_history"))
+        )
+
+        error_text = s.find_elements_by_id('set_history_error_text')
+
+        self.assertEqual(len(error_text), 1)

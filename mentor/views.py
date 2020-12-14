@@ -495,6 +495,11 @@ def set_history_async(request):
 
     # Get user details of opponent:
     opponent_details = get_user_details(opponent_slug)
+
+    # If no user found for opponent slug, then return null value in JSON:
+    if opponent_details is None:
+        return HttpResponse(json.dumps({'set_history': 'null'}))
+
     opponent_id = opponent_details['player']['id']
     opponent_gamertag = opponent_details['player']['gamerTag']
 

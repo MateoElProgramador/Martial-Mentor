@@ -113,6 +113,13 @@ function getSetHistory(user_slug, user_gamertag, sets) {
                 alert('Error in set history! Please report this to admin.\n' + result.error_text);
             } else {  // Success
                 setHistory = result.set_history;
+
+                // Display error message if opponent not found from slug:
+                if (setHistory == 'null') {
+                    $('#set_history_body').append('<div class="text-danger">Opponent slug does not exist</div>');
+                    return;
+                }
+
                 populateSetHistory(setHistory);
             }
         }

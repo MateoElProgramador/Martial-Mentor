@@ -1,0 +1,85 @@
+{% extends "layout.html" %}
+{% load static %}
+{% block title %}{{game}}: Insights{% endblock %}
+
+{% block content %}
+{% load humanize %}
+<h2 class="m-3">{{game}}: Insights</h2>
+<div class="container-fluid my-3">
+
+    <form action="{% url 'mentor:insights' game.id %}" method="post" class="my-2">
+        {% csrf_token %}
+        <a href="#" data-toggle="tooltip" data-placement="left" title="A player's identifying slug is found on the player's profile on smash.gg. Copy the last section of the url after 'user/'">?</a>
+        <label for="slug1">Smashgg player slug:</label>
+        <input type="text" id="slug1" name="slug1" required>
+
+        <label for="slug2">(Optional) Opponent player slug:</label>
+        <input type="text" id="slug2" name="slug2">
+
+        <input type="submit" id="slugSubmit" value="Get insights">
+    </form>
+
+    <h4 id="gamertag_header" class="my-3"></h4>
+
+    <div class="row p-3">
+
+        <div id="recent_sets_card" class="col-lg-3 card bg_grey m-2">
+            <div id="recent_sets_body" class="card-body">
+                <div class="card-title row my-2">
+                    <div class="col-6">
+                        <h4>Most Recent Sets</h4>
+                    </div>
+                    <div class="col-6">
+                        <strong id="recent_sets_ratio"></strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="recent_placements_card" class="col-lg-4 card bg_grey m-2">
+            <div id="recent_placements_body" class="card-body">
+                <h4 class="card-title">Recent Tournament Placings</h4>
+
+            </div>
+        </div>
+
+        {% if opponent_slug != '' %}
+            <div id="set_history_card" class="col-lg-4 card bg_grey m-2">
+                <div id="set_history_body" class="card-body">
+                    <div class="row my-2">
+                        <div class="col-5">
+                            <h4 id="set_history_title" class="card-title">Set History</h4>
+                        </div>
+                        <div class="col-7">
+                            <strong id="set_history_ratio"></strong>
+                        </div>
+                    </div>
+
+                </div>
+        {% endif %}
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+    {% csrf_token %}
+
+    <script>
+        // Activate tooltip functionality:
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip()
+        });
+
+        // Get variables from server:
+        var game_id = {{game.id}};
+        var method = "{{method}}";
+        var user_slug = "{{user_slug}}";
+        var opponent_slug = "{{opponent_slug}}";
+    </script>
+
+    <script src="{% static 'mentor/scripts/csrf_ajax.js' %}"></script>
+    <script src="{% static 'mentor/scripts/insights.js' %}"></script>
+{% endblock %}

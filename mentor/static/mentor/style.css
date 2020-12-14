@@ -49,3 +49,7 @@ body {
 .no_highlight::selection {
   background: transparent;
 }
+
+.bg_grey {
+    background-color: #e6e6e6;
+}

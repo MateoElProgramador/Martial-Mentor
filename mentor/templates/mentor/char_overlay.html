@@ -47,5 +47,6 @@
 
 {% block scripts %}
     {% csrf_token %}
+    <script src="{% static 'mentor/scripts/csrf_ajax.js' %}"></script>
     <script src="{% static 'mentor/scripts/char_overlay.js' %}"></script>
 {% endblock %}

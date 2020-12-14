@@ -1,4 +1,6 @@
+import json
 from distutils.util import strtobool
+from smashggAPI import client as sgg_client
 
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
@@ -11,7 +13,7 @@ from django.urls import reverse_lazy, reverse
 from django.utils.safestring import mark_safe
 from django.views import generic
 
-from martialmentor.settings import STATIC_ROOT
+from martialmentor.settings import STATIC_ROOT, BASE_DIR
 from mentor.models import Game, UserCharacter, snakify, Character
 
 
@@ -49,7 +51,6 @@ def serve_char_img(x):
     else:
         grayscale_str = ' grayscale'
 
-    # return mark_safe('<img class="char_overlay_img img-fluid' + grayscale_str + '" src="' + img_url + '" alt="' + char.name + '">')
     return mark_safe(
         '<a href="' + reverse("mentor:elite_smash_toggle", args=[char.game.id]) + '?char_id=' + str(char.id) + '">'
             '<img id="' + snakify(char.name) + '" class="char_overlay_img img-fluid' + grayscale_str +
@@ -61,11 +62,18 @@ class GameIndexView(generic.ListView):
     model = Game
     template_name = 'mentor/index.html'
 
+    def get_context_data(self, **kwargs):
+        """Override get context method to add variables to context."""
+        context = super().get_context_data(**kwargs)
+        context['all_games'] = Game.objects.all()
+        return context
+
 
 def tools(request, game_id):
     """Shows list of tools for selected game. Not that useful a page, will probably remove later."""
     game = get_object_or_404(Game, pk=game_id)
-    return render(request, 'mentor/tools.html', {'game': game})
+    all_games = Game.objects.all()
+    return render(request, 'mentor/tools.html', {'game': game, 'all_games': all_games})
 
 
 class GameDetailView(generic.DetailView):
@@ -76,8 +84,6 @@ class GameDetailView(generic.DetailView):
     def get_context_data(self, **kwargs):
         """Override get context method to add variable to context."""
         context = super().get_context_data(**kwargs)
-        # context['list_60'] = 'a' * 60
-        # context['list_17'] = 'a' * 17
         # context['list_77'] = 'a' * 77
 
         game = self.object
@@ -85,8 +91,7 @@ class GameDetailView(generic.DetailView):
         print('Character num: ', char_num)
 
         context['char_num'] = char_num
-
-        # context['char_num'] = 4
+        context['all_games'] = Game.objects.all()
 
         return context
 
@@ -139,6 +144,7 @@ def character_overlay(request, game_id):
                                                             'char_data': char_data,
                                                             'body_class': body_class,
                                                             'checkbox_checked': checkbox_checked,
+                                                            'all_games': Game.objects.all(),
                                                             })
         # return render(request, 'mentor/[not used] example_char_overlay.html', {'game': game, 'user_chars': user_chars,
         #                                                     'char_num': char_num, 'char_data': char_data, 'list_77': list_77})
@@ -185,6 +191,367 @@ def toggle_chromakey_session(request):
     request.session['chromakey'] = str(not strtobool(request.session['chromakey'])).lower()
     print('chromakey session is now', request.session['chromakey'])
     return HttpResponse('ok')
+
+
+# Insights:
+def insights(request, game_id):
+    game = get_object_or_404(Game, pk=game_id)
+    print("Let's show some insights")
+
+    query = '''
+        query TournamentQuery($slug: String, $perPage: Int) {
+            tournament(slug: $slug){
+                id
+                name
+                events {
+                    id
+                    name
+            standings(query: {
+              perPage: $perPage,
+              page: 1
+            }){
+              nodes {
+                placement
+                entrant {
+                  id
+                  name
+                }
+              }
+            }
+                }
+            }
+        }'''
+    query_vars = '{"slug": "cac-brac-all-stars-1", "perPage": 10}'
+    # result = sgg_client.query(query, query_vars)
+    # print(result)
+
+    opponent_slug = ''
+
+    if request.method == "POST":
+        user_slug = request.POST['slug1']
+        # Get slug of opponent if not blank:
+        if request.POST['slug2']:
+            opponent_slug = request.POST['slug2']
+
+    else:
+        # -- Slugs to identify specific players: -- #
+        # Mateo:
+        user_slug = 'b1bbac32'
+        # K.p:
+        user_slug = '653c25e1'
+        # Hungrybox:
+        user_slug = '076502c1'
+        # Moo$:
+        user_slug = 'a9b92e44'
+
+    return render(request, 'mentor/insights.html', {'game': game, 'method': request.method, 'user_slug': user_slug,
+                                                    'opponent_slug': opponent_slug, 'all_games': Game.objects.all()})
+
+
+def recent_sets_async(request):
+    """Get recent sets of given player using the smashgg API. Called by Ajax."""
+    if not request.is_ajax() or not request.method == 'POST':
+        return HttpResponseNotAllowed(['POST'])
+
+    game = get_object_or_404(Game, pk=request.POST['game_id'])
+    user_slug = request.POST['user_slug']
+
+    print("Recent sets async")
+    print(request.POST)
+
+    # Get slug of opponent if not blank:
+    if ('slug2' in request.POST) and request.POST['slug2']:
+        opponent_slug = request.POST['slug2']
+        set_num = 100
+    else:
+        opponent_slug = ''
+        set_num = 80
+
+    # Query for finding results of last 10 tournament sets of user, given user slug:
+    recent_sets_query = '''
+                query SetHistoryQuery($slug: String, $setNum: Int) {
+                    user(slug: $slug) {
+                    player {
+                      gamerTag
+                      sets(page: 1, perPage: $setNum, filters: {
+                        hideEmpty: true
+                      }) {
+                        pageInfo {
+                          total
+                        }
+                        nodes {
+                          completedAt
+                          displayScore
+                          event {
+                            name
+                            videogame {
+                              name
+                            }
+                            tournament {
+                              name
+                            }
+                          }
+                          fullRoundText
+                          lPlacement
+                          winnerId
+                          slots(includeByes: false) {
+                            entrant{
+                              id name
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }'''
+    recent_sets_query_vars = '{"slug": "' + user_slug + '", "setNum": "' + str(set_num) + '"}'
+
+    # Get recent sets of given player:
+    recent_sets = sgg_client.query(recent_sets_query, recent_sets_query_vars)['data']['user']
+
+    # If user key points to null, then player slug doesn't exist; return blank data:
+    if recent_sets is None:
+        print('User is null!')
+        return HttpResponse(json.dumps({'recent_sets': 'null'}))
+
+    recent_sets = recent_sets['player']
+
+    user_gamertag = recent_sets['gamerTag']
+
+    i = 0
+    del_inds = []
+    win_count = 0
+
+    # Find out whether given player was the winner in each set, and add 'win' key to each set entry:
+    for i, p_set in enumerate(recent_sets['sets']['nodes']):
+
+        # Collate indices of sets not for this game:
+        if p_set['event']['videogame']['name'] != game.title:
+            print(p_set['event']['tournament']['name'], 'is not', game.title, ', it is', p_set['event']['videogame']['name'])
+            del_inds.append(i)
+            continue
+
+        # If set is a DQ (disqualification), then mark this index for deletion:
+        if p_set['displayScore'] == 'DQ':
+            print('Set', i, 'is a DQ')
+            del_inds.append(i)
+            continue
+
+        # If entrant id of first entrant == winnerId, AND user gamertag is substring of first entrant, then they won
+        # Note: Checking that user_gamertag is in entrant name is to avoid discrepancies between gamertags from user
+        # not containing sponsors, e.g. 'Hungrybox' and 'Liquid | Hungrybox. This could cause issues if one player's
+        # gamertag was a substring of their opponent's...
+        # TODO: Come up with more robust way of identifying winner
+        if (p_set['winnerId'] == p_set['slots'][0]['entrant']['id']) & (
+                user_gamertag in p_set['slots'][0]['entrant']['name']):
+            p_set['win'] = 'true'
+            win_count += 1
+        # Same as above but in the event of the winner being the second listed entrant:
+        elif (p_set['winnerId'] == p_set['slots'][1]['entrant']['id']) & (
+                user_gamertag in p_set['slots'][1]['entrant']['name']):
+            p_set['win'] = 'true'
+            win_count += 1
+        else:
+            p_set['win'] = 'false'
+
+    # Add win count to dictionary:
+    recent_sets['winCount'] = win_count
+
+    # Filter out sets not for this videogame:
+    recent_sets['sets']['nodes'] = \
+        [elem for i, elem in enumerate(recent_sets['sets']['nodes'])
+         if i not in del_inds]
+
+    # recent_sets['sets']['nodes'] = recent_sets['sets']['nodes'][:15]        # Cap displayed sets to 15
+
+    # print(json.dumps(recent_sets, indent=4))
+    response = {'recent_sets': recent_sets}
+    return HttpResponse(json.dumps(response))
+
+
+def user_details_async(request):
+    """Get user details given user slug in request. Called by Ajax."""
+    if not request.is_ajax() or not request.method == 'POST':
+        return HttpResponseNotAllowed(['POST'])
+
+    user_slug = request.POST['user_slug']
+    # Get user details using helper method:
+    user_details = get_user_details(user_slug)
+
+    # If query doesn't find user, then flag as null in response JSON:
+    if user_details is None:
+        user_details = 'null'
+
+    response = {'user_details': user_details}
+    return HttpResponse(json.dumps(response))
+
+
+def get_user_details(user_slug):
+    """Uses smash.gg API to get and return user details given a user slug."""
+    # Get player id and gamertag from user slug:
+    user_player_query = '''
+            query GetUserDetails($slug: String) {
+              user(slug: $slug) {
+                id
+                player {
+                  id
+                  gamerTag
+                }
+              }
+            }'''
+    user_details = sgg_client.query(user_player_query, '{"slug": "' + user_slug + '"}')['data']['user']
+    return user_details
+
+
+def recent_placements_async(request):
+    """Get recent tournament placements of given player using the smashgg API. Called by Ajax."""
+    if not request.is_ajax() or not request.method == 'POST':
+        return HttpResponseNotAllowed(['POST'])
+
+    game = get_object_or_404(Game, pk=request.POST['game_id'])
+    user_slug = request.POST['user_slug']
+    user_gamertag = request.POST['user_gamertag']
+
+    # Hardcoded list of videogame IDS:
+    videogame_ids = {'Super Smash Bros. Ultimate': 1386, 'Super Smash Bros. Melee': 1}
+
+    # Get player's placements of 10 most recent tournaments:
+    recent_placements_query = '''query GetPlayerPlacements($slug: String, $gamertag: String, $videogameId: ID!) {
+              user(slug: $slug) {
+                    events(query: {
+                  page: 1,
+                  perPage: 15,
+                  filter: {
+                    videogameId: [$videogameId]
+                  }
+                }) {
+                  nodes {
+                  name
+                  slug
+                  videogame {
+                    name
+                  }
+                    tournament {
+                      name
+                    }
+                    numEntrants
+                    standings(query: {
+                      filter: {
+                        search: {
+                          fieldsToSearch: "gamerTag"
+                          searchString: $gamertag
+                        }
+                      }
+                    }) {
+                      nodes {
+                        placement
+                      }
+                    }
+                  }
+                }
+              }
+            }'''
+    recent_placements_vars = '{"slug": "' + user_slug + '", "gamertag": "' + user_gamertag + '", "videogameId": "' + str(videogame_ids[game.title]) + '"}'
+    recent_placements = sgg_client.query(recent_placements_query, recent_placements_vars)['data']['user']['events']['nodes']
+
+    # print(json.dumps(recent_placements, indent=4))
+
+    del_inds = []
+
+    # Calculate top percentage based on tournament placements, and add to dict:
+    for i, placement in enumerate(recent_placements):
+        # Identify indices of placements of wrong videogame:
+        # if placement['videogame']['name'] != game.title:
+        #     print(placement['tournament']['name'], 'is not', game.title, ', it is', placement['videogame']['name'])
+        #     del_inds.append(i)
+        #     continue
+
+        # Deal with tournaments where standings are null:
+        if not placement['standings']:
+            print('Null alert!')
+            placement['topPerc'] = 'null'
+            # del_inds.append(i)
+        else:
+            placement['topPerc'] = round((placement['standings']['nodes'][0]['placement'] / placement['numEntrants']) * 100)
+
+    # Filter out placements not for this videogame:
+    # recent_placements = [elem for i, elem in enumerate(recent_placements) if i not in del_inds]
+    # recent_placements = recent_placements[:10]       # Cap number of placements displayed
+
+    response = {'placements': recent_placements}
+    return HttpResponse(json.dumps(response))
+
+
+def set_history_async(request):
+    """Get set history between two players, given both user slugs. Called by Ajax."""
+    if not request.is_ajax() or not request.method == 'POST':
+        return HttpResponseNotAllowed(['POST'])
+
+    game = get_object_or_404(Game, pk=request.POST['game_id'])
+    user_slug = request.POST['user_slug']
+    opponent_slug = request.POST['opponent_slug']
+    user_gamertag = request.POST['user_gamertag']
+    sets = json.loads(request.POST['sets'])
+
+    # Get user details of opponent:
+    opponent_details = get_user_details(opponent_slug)
+
+    # If no user found for opponent slug, then return null value in JSON:
+    if opponent_details is None:
+        return HttpResponse(json.dumps({'set_history': 'null'}))
+
+    opponent_id = opponent_details['player']['id']
+    opponent_gamertag = opponent_details['player']['gamerTag']
+
+    set_history_query = '''
+        query GetSetHistory($slug1: String, $opp_id: ID!){
+          user(slug: $slug1) {
+            player {
+              sets(filters: {
+                playerIds: [$opp_id]
+              }) {
+                pageInfo {
+                  total,
+                  totalPages,
+                  sortBy,
+                  filter,
+                  page,
+                  perPage
+                }
+                nodes {
+                  id
+                }
+              }
+            }
+          }
+        }'''
+
+    # set_history_vars = '{"slug1": "' + user_slug + '", "opp_id": ' + int(opponent_id) + '}'
+    # set_history = sgg_client.query(set_history_query, set_history_vars)
+
+    # set_hist_inds = []
+    win_count = 0
+    set_history = {'opponentGamertag': opponent_gamertag, 'winCount': 0, 'sets': []}
+
+    print('Opponent gamertag:', opponent_gamertag)
+    # print(json.dumps(sets, indent=4))
+
+    # Filter sets which contain opponent:
+    for i, p_set in enumerate(sets['sets']['nodes']):
+        if (opponent_gamertag in p_set['slots'][0]['entrant']['name']) or (opponent_gamertag in p_set['slots'][1]['entrant']['name']):
+            # set_hist_inds.append(i)
+            print('Aha!')
+            set_history['sets'].append(p_set)
+            if p_set['win'] == 'true':
+                win_count += 1
+
+    set_history['winCount'] = win_count
+
+    print(set_history)
+
+    response = {'set_history': set_history}
+    # print(json.dumps(response, indent=4))
+    return HttpResponse(json.dumps(response))
 
 
 class CustomUserCreationForm(UserCreationForm):

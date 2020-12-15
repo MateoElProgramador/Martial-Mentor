@@ -155,6 +155,6 @@ EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
 
 # Get smashgg API key from .env file, and load into os.environ for use by the smashggAPI package:
 # TODO: Quite convoluted, should centralise environment variables
-env_dir = BASE_DIR + '\martialmentor\.env'
+env_dir = BASE_DIR + '/martialmentor/.env'
 load_dotenv(dotenv_path=env_dir)
 os.environ['SMASHGG_API_KEY'] = os.getenv('SMASHGG_API_KEY')

@@ -3,7 +3,7 @@ Welcome to Martial Mentor, a web app created for fighting game players to offer 
 
 ## Features
 ### Elite Smash Character Overlay
-![Character Overlay page screenshot](docs/Character Overlay.png)
+![Character Overlay page screenshot](docs/character_overlay.png)
 
 Although this site is designed to cater to players of any 1-on-1 fighting game, this feature is based around 
 Super Smash Bros. Ultimate, which contains an online mode where characters obtain the coveted Elite Smash status when
@@ -17,7 +17,7 @@ This page can be used for reference when not playing the game, and can also be u
 A chroma key background can be toggled, so that the character icons can be displayed helpfully around the border of your stream!
 
 ### Insights Using smash.gg
-![Insights page screenshot](docs/Insights.png)
+![Insights page screenshot](docs/insights.png)
 
 The eSports tournament bracket website smash.gg is now used for many different games, meaning that insights using
 tournament data can be obtained for more games than ever before!

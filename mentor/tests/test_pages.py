@@ -42,12 +42,10 @@ class ToolsPageTests(MyStaticLiveServerTestCase):
         game = create_game('Mortal Kombat X')
 
         s.get(self.live_server_url)
-        # game_anchor = s.find_element_by_link_text(str(game))
-        game_anchor = s.find_element_by_xpath("//body//a[text()='" + str(game) + "']")
-        game_anchor.click()
+        game_anchor = s.find_element_by_link_text(str(game)).click()
 
         assert 'Mortal Kombat X: Tools' in s.page_source
-        assert 'Analytics' in s.page_source
+        assert 'Insights' in s.page_source
 
     def test_visiting_invalid_tools_page(self):
         """When a URL is entered navigating to a tools page of a game which doesn't exist, a 404 error is displayed."""

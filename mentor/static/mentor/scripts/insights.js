@@ -151,7 +151,7 @@ function populateRecentSets(sets) {
             $("#recent_sets_body").append('<strong>' + currTournament + '</strong>');
         // If different tournament to previous sets, add horizontal rule and tournament header, update lastTournament:
         } else if (lastTournament != currTournament) {
-            $("#recent_sets_body").append('<hr class="m-0"/>');
+            $("#recent_sets_body").append('<hr class="m-0 mb-1"/>');
             $("#recent_sets_body").append('<strong>' + currTournament + '</strong>');
             lastTournament = currTournament;
         }

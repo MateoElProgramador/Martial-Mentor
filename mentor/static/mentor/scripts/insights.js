@@ -68,6 +68,22 @@ function getRecentSets(game_id, user_slug) {
                 // Add sets content to page:
                 populateRecentSets(sets);
 
+
+                // If 2 slugs entered:
+                    // Look at 'total' sets value from recent sets data
+                    // binSize = 100 (check this)
+                    // binNum = total / binSize
+                    // for i=0 to binNum:
+                        // get sets (pass i for page in query)
+                        // success callback:
+                            // Add sets to list in this scope (recent sets success callback, that is)
+                            // Populate recent sets card?
+                            // if last bin, send all sets to set_history view to sort out
+
+                            // success callback:
+                                // Display set history
+
+
                 // Get set history if two user slugs have been entered in form:
                 if (opponent_slug != "") {
                     getSetHistory(user_slug, user_gamertag, sets);
@@ -159,7 +175,7 @@ function populateRecentSets(sets) {
         // Create row and columns for each recent set:
         $("#recent_sets_body").append('<div class="recent_set row my-2">\
             <div class="col-7">\
-                <span class="recent_set ' + textClass + '">' + set.displayScore + '</span>\
+                <span class="' + textClass + '">' + set.displayScore + '</span>\
             </div>\
             <div class="col-5">\
                 <span class="row">' + set.fullRoundText + '</span>\

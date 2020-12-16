@@ -431,11 +431,6 @@ def recent_placements_async(request):
 
     # Calculate top percentage based on tournament placements, and add to dict:
     for i, placement in enumerate(recent_placements):
-        # Identify indices of placements of wrong videogame:
-        # if placement['videogame']['name'] != game.title:
-        #     print(placement['tournament']['name'], 'is not', game.title, ', it is', placement['videogame']['name'])
-        #     del_inds.append(i)
-        #     continue
         print(placement, '\n\n')
 
         # Deal with tournaments where standings are null:
@@ -448,6 +443,7 @@ def recent_placements_async(request):
         elif not placement['standings']['nodes']:
             print('Did not compete!')
             placement['topPerc'] = 'did not compete'
+            # del_inds.append(i)
         else:
             placement['topPerc'] = round((placement['standings']['nodes'][0]['placement'] / placement['numEntrants']) * 100)
 
@@ -480,6 +476,8 @@ def set_history_async(request):
     opponent_id = opponent_details['player']['id']
     opponent_gamertag = opponent_details['player']['gamerTag']
 
+    # NOTE: This query should filter sets to find set history between 2 players, but there's a bug
+    # in the API and it's broken...
     set_history_query = '''
         query GetSetHistory($slug1: String, $opp_id: ID!){
           user(slug: $slug1) {
@@ -533,7 +531,6 @@ def set_history_async(request):
 
 class CustomUserCreationForm(UserCreationForm):
     """Custom user creation form to include email address in fields."""
-
     class Meta:
         model = User
         fields = ('username', 'email', 'password1', 'password2')

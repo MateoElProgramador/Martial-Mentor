@@ -131,6 +131,9 @@ function getSetHistory(user_slug, user_gamertag, sets) {
 function populateRecentSets(sets) {
     $('#recent_sets_ratio').html("Recent win rate: " + sets.winCount + " out of " + sets.sets.nodes.length +
                                     " (" + Math.round((sets.winCount / sets.sets.nodes.length) * 100) + "%)");
+
+    var lastTournament = "";
+
     // Append each set result into the recent sets card:
     sets.sets.nodes.every((set, i) => {
         var textClass = ""
@@ -140,10 +143,23 @@ function populateRecentSets(sets) {
             textClass = "text-danger";
         }
 
+        var currTournament = set.event.tournament.name;
+
+        // If first set, give value to lastTournament and add tournament header:
+        if (i == 0) {
+            lastTournament = currTournament;
+            $("#recent_sets_body").append('<strong>' + currTournament + '</strong>');
+        // If different tournament to previous sets, add horizontal rule and tournament header, update lastTournament:
+        } else if (lastTournament != currTournament) {
+            $("#recent_sets_body").append('<hr class="m-0"/>');
+            $("#recent_sets_body").append('<strong>' + currTournament + '</strong>');
+            lastTournament = currTournament;
+        }
+
         // Create row and columns for each recent set:
         $("#recent_sets_body").append('<div class="recent_set row my-2">\
             <div class="col-7">\
-                <p class="recent_set ' + textClass + '">' + set.displayScore + '</p>\
+                <span class="recent_set ' + textClass + '">' + set.displayScore + '</span>\
             </div>\
             <div class="col-5">\
                 <span class="row">' + set.fullRoundText + '</span>\

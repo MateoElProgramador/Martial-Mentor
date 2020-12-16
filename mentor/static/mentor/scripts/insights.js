@@ -159,9 +159,12 @@ function populateRecentPlacements(placements) {
         if (p.topPerc == 'null') {
             standingsText = 'N/A</strong> (No standings found)';
             percText = 'N/A'
+        } else if (p.topPerc == 'did not compete') {
+            standingsText = 'N/A</strong> (Did not compete)';
+            percText = 'N/A';
         } else {
             standingsText = p.standings.nodes[0].placement + nth(p.standings.nodes[0].placement) + '</strong> of ' + p.numEntrants;
-            percText = '<strong>(top ' + p.topPerc + '%)</strong>'
+            percText = '<strong>(top ' + p.topPerc + '%)</strong>';
         }
 
         $("#recent_placements_body").append('<div class="recent_placing row my-2">\

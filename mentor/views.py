@@ -468,10 +468,15 @@ def recent_placements_async(request):
         print(placement, '\n\n')
 
         # Deal with tournaments where standings are null:
-        if not placement['standings'] or not placement['standings']['nodes']:
+        if not placement['standings']:
             print('Null alert!')
             placement['topPerc'] = 'null'
+            continue
             # del_inds.append(i)
+        # If the standings is not null but the nodes is, then the player dropped out and didn't compete:
+        elif not placement['standings']['nodes']:
+            print('Did not compete!')
+            placement['topPerc'] = 'did not compete'
         else:
             placement['topPerc'] = round((placement['standings']['nodes'][0]['placement'] / placement['numEntrants']) * 100)
 

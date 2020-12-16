@@ -465,9 +465,10 @@ def recent_placements_async(request):
         #     print(placement['tournament']['name'], 'is not', game.title, ', it is', placement['videogame']['name'])
         #     del_inds.append(i)
         #     continue
+        print(placement, '\n\n')
 
         # Deal with tournaments where standings are null:
-        if not placement['standings']:
+        if not placement['standings'] or not placement['standings']['nodes']:
             print('Null alert!')
             placement['topPerc'] = 'null'
             # del_inds.append(i)

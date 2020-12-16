@@ -139,7 +139,17 @@ function populateRecentSets(sets) {
         } else {
             textClass = "text-danger";
         }
-        $("#recent_sets_body").append('<p class="recent_set ' + textClass + '">' + set.displayScore + '</p>');
+
+        // Create row and columns for each recent set:
+        $("#recent_sets_body").append('<div class="recent_set row my-2">\
+            <div class="col-7">\
+                <p class="recent_set ' + textClass + '">' + set.displayScore + '</p>\
+            </div>\
+            <div class="col-5">\
+                <span class="row">' + set.fullRoundText + '</span>\
+            </div>\
+        </div>\
+        ');
 
         // Only display the first 15 sets:
         if (i >= 14) { return false; }

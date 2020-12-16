@@ -197,34 +197,6 @@ def toggle_chromakey_session(request):
 def insights(request, game_id):
     game = get_object_or_404(Game, pk=game_id)
     print("Let's show some insights")
-
-    query = '''
-        query TournamentQuery($slug: String, $perPage: Int) {
-            tournament(slug: $slug){
-                id
-                name
-                events {
-                    id
-                    name
-            standings(query: {
-              perPage: $perPage,
-              page: 1
-            }){
-              nodes {
-                placement
-                entrant {
-                  id
-                  name
-                }
-              }
-            }
-                }
-            }
-        }'''
-    query_vars = '{"slug": "cac-brac-all-stars-1", "perPage": 10}'
-    # result = sgg_client.query(query, query_vars)
-    # print(result)
-
     opponent_slug = ''
 
     if request.method == "POST":
@@ -283,7 +255,6 @@ def recent_sets_async(request):
                           completedAt
                           displayScore
                           event {
-                            name
                             videogame {
                               name
                             }

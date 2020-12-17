@@ -318,7 +318,18 @@ function populateSetHistory(sets) {
         } else {
             textClass = "text-danger";
         }
-        $("#set_history_body").append('<p class="set_history ' + textClass + '">' + set.displayScore + '</p>');
+
+        // Create row and columns containing score, tournament and round:
+        $("#set_history_body").append('<div class="set_history row my-2">\
+            <div class="col-6">\
+                <p class="'+ textClass + '">' + set.displayScore + '</p>\
+            </div>\
+            <div class="col-6">\
+                <div>' + set.event.tournament.name + '</div>\
+                <div><em>' + set.fullRoundText + '</em></div>\
+            </div>\
+        </div>\
+        ');
 
         // Only display the first 15 sets:
 //        if (i >= 15) { return false; }

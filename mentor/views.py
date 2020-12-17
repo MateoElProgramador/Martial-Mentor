@@ -229,29 +229,35 @@ def recent_sets_async(request):
     user_slug = request.POST['user_slug']
 
     print("Recent sets async")
-    print(request.POST)
+    # print(request.POST)
 
     # Get slug of opponent if not blank:
     if ('slug2' in request.POST) and request.POST['slug2']:
         opponent_slug = request.POST['slug2']
-        set_num = 100
+        # set_num = 100
     else:
         opponent_slug = ''
-        set_num = 80
+        # set_num = 80
+
+    page_num = request.POST['page_num']
+    per_page = request.POST['per_page']
+
+    # print('Page', page_num)
 
     # Query for finding results of last 10 tournament sets of user, given user slug:
     recent_sets_query = '''
-                query SetHistoryQuery($slug: String, $setNum: Int) {
+                query RecentSetsQuery($slug: String, $page: Int, $perPage: Int) {
                     user(slug: $slug) {
                     player {
                       gamerTag
-                      sets(page: 1, perPage: $setNum, filters: {
+                      sets(page: $page, perPage: $perPage, filters: {
                         hideEmpty: true
                       }) {
                         pageInfo {
                           total
                         }
                         nodes {
+                          id
                           completedAt
                           displayScore
                           event {
@@ -275,7 +281,7 @@ def recent_sets_async(request):
                     }
                   }
                 }'''
-    recent_sets_query_vars = '{"slug": "' + user_slug + '", "setNum": "' + str(set_num) + '"}'
+    recent_sets_query_vars = '{"slug": "' + user_slug + '", "page": "' + str(page_num) + '", "perPage": "' + str(per_page) + '"}'
 
     # Get recent sets of given player:
     recent_sets = sgg_client.query(recent_sets_query, recent_sets_query_vars)['data']['user']
@@ -298,13 +304,13 @@ def recent_sets_async(request):
 
         # Collate indices of sets not for this game:
         if p_set['event']['videogame']['name'] != game.title:
-            print(p_set['event']['tournament']['name'], 'is not', game.title, ', it is', p_set['event']['videogame']['name'])
+            # print(p_set['event']['tournament']['name'], 'is not', game.title, ', it is', p_set['event']['videogame']['name'])
             del_inds.append(i)
             continue
 
-        # If set is a DQ (disqualification), then mark this index for deletion:
-        if p_set['displayScore'] == 'DQ':
-            print('Set', i, 'is a DQ')
+        # If set is a DQ (disqualification), or displayScore is null, then mark this index for deletion:
+        if p_set['displayScore'] == 'DQ' or not p_set['displayScore']:
+            # print('Set', i, 'is a DQ/ null displayScore')
             del_inds.append(i)
             continue
 
@@ -464,17 +470,19 @@ def set_history_async(request):
     user_slug = request.POST['user_slug']
     opponent_slug = request.POST['opponent_slug']
     user_gamertag = request.POST['user_gamertag']
+    opponent_gamertag = request.POST['opponent_gamertag']
+
     sets = json.loads(request.POST['sets'])
 
     # Get user details of opponent:
-    opponent_details = get_user_details(opponent_slug)
+    # opponent_details = get_user_details(opponent_slug)
 
     # If no user found for opponent slug, then return null value in JSON:
-    if opponent_details is None:
-        return HttpResponse(json.dumps({'set_history': 'null'}))
+    # if opponent_details is None:
+    #     return HttpResponse(json.dumps({'set_history': 'null'}))
 
-    opponent_id = opponent_details['player']['id']
-    opponent_gamertag = opponent_details['player']['gamerTag']
+    # opponent_id = opponent_details['player']['id']
+    # opponent_gamertag = opponent_details['player']['gamerTag']
 
     # NOTE: This query should filter sets to find set history between 2 players, but there's a bug
     # in the API and it's broken...
@@ -508,11 +516,12 @@ def set_history_async(request):
     win_count = 0
     set_history = {'opponentGamertag': opponent_gamertag, 'winCount': 0, 'sets': []}
 
+    print(json.dumps(sets, indent=4))
+    print('Total sets for this game:', len(sets))
     print('Opponent gamertag:', opponent_gamertag)
-    # print(json.dumps(sets, indent=4))
 
     # Filter sets which contain opponent:
-    for i, p_set in enumerate(sets['sets']['nodes']):
+    for i, p_set in enumerate(sets):
         if (opponent_gamertag in p_set['slots'][0]['entrant']['name']) or (opponent_gamertag in p_set['slots'][1]['entrant']['name']):
             # set_hist_inds.append(i)
             print('Aha!')

@@ -75,6 +75,7 @@ function getRecentSets(game_id, user_slug, page_num=1, per_page=100, last_page=n
                 }
 
                 user_gamertag = sets.gamerTag;
+                setsBatchCounter++;     // increment counter, tracking how many set batches have been fetched
 
                 // If this function was called by normal page loading and not for set history:
                 if (page_num == 1) {
@@ -91,7 +92,6 @@ function getRecentSets(game_id, user_slug, page_num=1, per_page=100, last_page=n
                     return;
                 }
 
-
                 // If called by set history:
 
                 // Append new sets to allSets:
@@ -99,8 +99,9 @@ function getRecentSets(game_id, user_slug, page_num=1, per_page=100, last_page=n
 
                 // TODO: check for start date being before game release.
 
-                // If this is last batch of sets, send all sets to set history view:
-                if (page_num == last_page) {
+                //  If setsBatchCounter has been incremented up to the last page, each by a different callback function,
+                //  then all sets have been queried, so it is time for set history:
+                if (setsBatchCounter == last_page) {
                     alert("Set num for this game: " + allSets.length);
                     getSetHistory(user_slug, user_gamertag, opponent_gamertag, allSets);
                 }

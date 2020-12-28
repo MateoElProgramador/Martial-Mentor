@@ -15,7 +15,7 @@ ssbu_chars = ['Mario', 'Donkey Kong', 'Link', 'Samus', 'Dark Samus', 'Yoshi',
               'Duck Hunt Duo', 'Ryu', 'Ken', 'Cloud', 'Corrin', 'Bayonetta',
               'Inkling', 'Ridley', 'Simon', 'Richter', 'King K. Rool',
               'Isabelle', 'Incineroar', 'Piranha Plant', 'Joker', 'Hero',
-              'Banjo & Kazooie', 'Terry', 'Byleth', 'Min Min', 'Steve',
+              'Banjo & Kazooie', 'Terry', 'Byleth', 'Min Min', 'Steve', 'Sephiroth',
               'Mii Brawler', 'Mii Swordfighter', 'Mii Gunner']
 
 
